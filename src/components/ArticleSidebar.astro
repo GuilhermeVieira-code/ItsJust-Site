@@ -326,6 +326,7 @@ const NAV = [
       try { localStorage.setItem(STORAGE_KEY, '0'); } catch {}
     }
 
+    // Usa AbortController para limpar listeners antigos ao re-inicializar
     const ac = new AbortController();
     const opts = { signal: ac.signal };
 
@@ -334,16 +335,19 @@ const NAV = [
     overlay.addEventListener('click', closeSidebar, opts);
     menuBtn?.addEventListener('click', openSidebar, opts);
 
+    // Limpa listeners quando o próximo page-load acontecer
     document.addEventListener('astro:before-swap', () => ac.abort(), { once: true });
 
+    // Estado inicial
     const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch { return null; } })();
     if (window.innerWidth >= 1024) {
       saved === '0' ? closeSidebar() : openSidebar();
     } else {
-      closeSidebar();
+      closeSidebar(); // móvel: sempre começa fechado, hamburger abre
     }
   }
 
+  // Inicializa no load normal e após cada transição de página
   initSidebar();
   document.addEventListener('astro:page-load', initSidebar);
 </script>

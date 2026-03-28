@@ -83,6 +83,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       revealEls.forEach(el => io.observe(el));
     }
 
+    // Roda no load inicial e após cada transição de página
     initReveal();
     document.addEventListener('astro:page-load', initReveal);
   </script>
@@ -102,11 +103,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
       const colors = ['#D4A017', '#F2A900', '#FFD54F', '#E8C547', '#C49010', '#B8860B', '#FBBF24', '#F59E0B'];
 
+      // Distribui pétalas em colunas para cobrir a tela toda
       for (let i = 0; i < count; i++) {
         const scale = (0.6 + Math.random() * 1.8).toFixed(2);
         const rotate = Math.floor(180 + Math.random() * 540);
         const duration = (0.8 + Math.random() * 1.0).toFixed(2);
+        // Delay escalonado para que as pétalas desçam em ondas cobrindo a tela
         const delay = (i / count * 0.5 + Math.random() * 0.2).toFixed(2);
+        // Distribuição uniforme horizontal: divide a tela em faixas
         const col = i % 10;
         const leftBase = col * 10 + Math.random() * 8;
         const el = document.createElement('div');
@@ -129,7 +133,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       setTimeout(() => { overlay.innerHTML = ''; }, 2000);
     }
 
+    // Dispara pétalas antes de cada transição de página
     document.addEventListener('astro:before-preparation', () => spawnPetals());
+    // Fallback: dispara no before-swap se ainda não houver pétalas
     document.addEventListener('astro:before-swap', () => {
       if (!document.getElementById('petal-overlay')?.children.length) spawnPetals(40);
     });
