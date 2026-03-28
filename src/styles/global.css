@@ -1,0 +1,282 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap');
+
+/* ─── Base ─────────────────────────────────────────── */
+@layer base {
+  html {
+    font-family: theme('fontFamily.body');
+    background-color: theme('colors.cream');
+    color: theme('colors.dark-brown');
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: theme('fontFamily.heading');
+  }
+
+  /* Scroll offset para headings com ID (TOC links) — mais espaço para heading respirar */
+  h2[id], h3[id], h4[id] {
+    scroll-margin-top: 7rem;
+  }
+
+  ::selection {
+    background-color: theme('colors.gold');
+    color: theme('colors.dark-brown');
+  }
+}
+
+/* ─── View Transitions — entrada e saída de página ──── */
+::view-transition-old(root) {
+  animation: page-exit 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+::view-transition-new(root) {
+  animation: page-enter 0.45s cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+@keyframes page-exit {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-14px) scale(0.985); }
+}
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(18px) scale(1.008); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Pétalas caindo na transição ───────────────────── */
+@keyframes petal-fall {
+  0%   { opacity: 0; transform: translateY(-20px) rotate(0deg) scale(var(--s, 1)); }
+  15%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(110vh) rotate(var(--r, 540deg)) scale(var(--s, 1)); }
+}
+
+/* ─── Animação de highlight ao navegar via TOC ──────── */
+@keyframes heading-highlight {
+  0%   { color: inherit; }
+  15%  { color: #D4A017; }
+  85%  { color: #D4A017; }
+  100% { color: inherit; }
+}
+
+.heading-flash {
+  animation: heading-highlight 1.6s ease-in-out;
+}
+
+/* ─── Scroll reveal ─────────────────────────────────── */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.reveal.visible {
+  animation: reveal-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.reveal-delay-1.visible { animation-delay: 0.08s; }
+.reveal-delay-2.visible { animation-delay: 0.16s; }
+.reveal-delay-3.visible { animation-delay: 0.24s; }
+.reveal-delay-4.visible { animation-delay: 0.32s; }
+
+/* ─── Ícone dourado nos h2 do artigo (escala com a fonte) ── */
+.prose-itsjust h2 {
+  padding-left: 1.1em;
+  position: relative;
+}
+.prose-itsjust h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.45em;
+  height: 0.45em;
+  background-color: #D4A017;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0.15em rgba(212, 160, 23, 0.2);
+}
+
+/* ─── Container de cada seção do artigo ─────────────── */
+.prose-section {
+  background: #FFFBF0;
+  border: 1px solid #EDE3CE;
+  border-radius: 0.75rem;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 6px rgba(44, 24, 16, 0.04);
+}
+.prose-section > *:first-child { margin-top: 0 !important; }
+.prose-section > *:last-child  { margin-bottom: 0 !important; }
+
+/* ─── Glow no container de seção ao navegar via TOC ─── */
+@keyframes section-glow {
+  0%   { border-color: #EDE3CE; box-shadow: 0 1px 6px rgba(44,24,16,0.04); }
+  35%  { border-color: #D4A017; box-shadow: 0 0 0 3px rgba(212,160,23,0.14), 0 4px 20px rgba(212,160,23,0.10); }
+  70%  { border-color: #D4A017; box-shadow: 0 0 0 3px rgba(212,160,23,0.14), 0 4px 20px rgba(212,160,23,0.10); }
+  100% { border-color: #EDE3CE; box-shadow: 0 1px 6px rgba(44,24,16,0.04); }
+}
+.section-glow {
+  animation: section-glow 2s ease-in-out;
+}
+
+/* ─── Sidebars fixas (esquerda + TOC direito) ────────── */
+#site-header,
+#article-content-wrapper,
+#page-main {
+  transition: padding-left 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#article-content-wrapper {
+  padding-left: 0;
+}
+
+/* TOC direito — fixo, colapsável em telas estreitas */
+#article-toc-right {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 17rem;
+  z-index: 40;
+  background: #FFFDF8;
+  border-left: 1px solid #E8DCC8;
+  box-shadow: -4px 0 28px rgba(44, 24, 16, 0.10);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4.5rem 0.75rem 1rem 0.5rem;
+}
+#article-toc-right.toc-open {
+  transform: translateX(0);
+}
+/* Backdrop para fechar o TOC em mobile */
+#toc-backdrop {
+  display: none;
+}
+#toc-backdrop.toc-open {
+  display: block;
+}
+@media (min-width: 1280px) {
+  #article-toc-right {
+    top: 4.5rem;
+    height: auto;
+    max-height: calc(100vh - 5rem);
+    width: 16rem;
+    background: transparent;
+    border-left: none;
+    box-shadow: none;
+    transform: none !important;
+    padding: 1rem 1rem 1rem 0.5rem;
+  }
+  /* Reserva espaço à direita para o TOC não cobrir o conteúdo */
+  #article-content-wrapper {
+    padding-right: 16rem;
+  }
+  /* Esconde o botão flutuante e backdrop no xl+ */
+  #toc-toggle-btn,
+  #toc-backdrop {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  #article-content-wrapper {
+    padding-left: var(--sidebar-w, 18rem);
+  }
+  /* Header desloca quando sidebar abre */
+  body[data-sidebar="open"] #site-header {
+    padding-left: 18rem;
+  }
+  /* Logo some do header quando sidebar está visível (sidebar tem o logo) */
+  body[data-sidebar="open"] #header-logo {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  body[data-sidebar="closed"] #header-logo,
+  body:not([data-sidebar]) #header-logo {
+    opacity: 1;
+    transition: opacity 0.2s;
+  }
+}
+
+/* ─── Componentes ───────────────────────────────────── */
+@layer components {
+
+  /* Botão primário */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-gold text-dark-brown font-bold font-body
+           px-6 py-3 rounded text-sm transition-all duration-200
+           shadow-[0_2px_8px_rgba(212,160,23,0.35)]
+           hover:bg-amber hover:shadow-[0_4px_16px_rgba(212,160,23,0.45)]
+           hover:-translate-y-0.5 active:translate-y-0 active:shadow-none;
+  }
+
+  /* Botão secundário */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 border-2 border-gold text-gold font-bold font-body
+           px-6 py-3 rounded text-sm transition-all duration-200
+           hover:bg-gold hover:text-dark-brown hover:-translate-y-0.5
+           hover:shadow-[0_4px_12px_rgba(212,160,23,0.3)];
+  }
+
+  /* Botão ghost (navegação interna) */
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 font-body text-sm font-medium text-gold
+           hover:text-amber transition-colors duration-150;
+  }
+
+  /* Card com hover lift */
+  .card {
+    @apply bg-card-bg rounded border-l-4 border-gold p-6
+           shadow-[0_2px_8px_rgba(44,24,16,0.06)]
+           hover:shadow-[0_6px_20px_rgba(44,24,16,0.12)]
+           hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  /* Card escuro */
+  .card-dark {
+    @apply bg-warm-brown rounded border-t-4 border-gold p-6
+           shadow-[0_2px_12px_rgba(0,0,0,0.2)]
+           hover:shadow-[0_6px_24px_rgba(0,0,0,0.3)]
+           hover:-translate-y-0.5 transition-all duration-200;
+  }
+
+  /* Tag / badge */
+  .tag {
+    @apply inline-block bg-card-bg text-warm-gray font-body text-xs font-medium
+           px-3 py-1 rounded-sm border border-[#E8DCC8]
+           transition-colors duration-150
+           hover:border-gold hover:text-gold;
+  }
+
+  /* Tag dourada */
+  .tag-gold {
+    @apply inline-block bg-gold/10 text-gold font-body text-xs font-semibold
+           px-3 py-1 rounded-sm border border-gold/30;
+  }
+
+  /* Linha separadora */
+  .divider {
+    @apply border-t border-card-bg my-8;
+  }
+
+  /* Section header decorado */
+  .section-title {
+    @apply font-heading font-bold text-2xl text-dark-brown
+           relative inline-block pb-2
+           after:content-[''] after:absolute after:bottom-0 after:left-0
+           after:w-12 after:h-0.5 after:bg-gold after:rounded;
+  }
+
+  /* Highlight de texto inline */
+  .highlight {
+    @apply relative inline-block px-1
+           bg-gradient-to-r from-gold/20 to-amber/10
+           rounded-sm text-dark-brown font-medium;
+  }
+}

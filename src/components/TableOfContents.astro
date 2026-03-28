@@ -1,0 +1,135 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+interface Props {
+  headings: Heading[];
+}
+const { headings } = Astro.props;
+const filtered = headings.filter(h => h.depth === 2 || h.depth === 3);
+---
+
+{filtered.length > 1 && (
+  <div class="toc-card bg-card-bg border border-[#E8DCC8] rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(44,24,16,0.10)]">
+
+    <!-- Cabeçalho do card -->
+    <div class="px-4 py-3 bg-dark-brown flex items-center gap-2">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4A017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <span class="font-body text-xs font-bold text-cream uppercase tracking-widest">Neste artigo</span>
+    </div>
+
+    <!-- Lista de headings -->
+    <nav id="toc" aria-label="Índice do artigo">
+      <ul>
+        {filtered.map((h, i) => (
+          <li class:list={['toc-item border-b border-[#EDE3CE] last:border-0', h.depth === 3 && 'bg-[#FFFDF8]']}>
+            <a
+              href={`#${h.slug}`}
+              class:list={[
+                'toc-link flex items-start gap-2.5 font-body leading-snug transition-all duration-150',
+                'border-l-3 border-transparent',
+                h.depth === 2
+                  ? 'text-sm font-medium text-warm-brown px-4 py-3 hover:text-gold hover:bg-gold/5 hover:border-l-gold'
+                  : 'text-xs text-warm-gray px-4 py-2.5 pl-8 hover:text-gold hover:bg-gold/5',
+              ]}
+            >
+              {h.depth === 2 && (
+                <span class="toc-dot mt-1.5 w-1.5 h-1.5 rounded-full bg-warm-gray/40 flex-shrink-0 transition-colors duration-150"></span>
+              )}
+              {h.depth === 3 && (
+                <span class="mt-1.5 w-1 h-1 rounded-full bg-warm-gray/25 flex-shrink-0"></span>
+              )}
+              <span>{h.text}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+  </div>
+)}
+
+<style>
+  .border-l-3 { border-left-width: 3px; }
+
+  .toc-link.active {
+    color: #D4A017;
+    background-color: rgba(212, 160, 23, 0.07);
+    border-left-color: #D4A017;
+    font-weight: 600;
+  }
+  .toc-link.active .toc-dot {
+    background-color: #D4A017;
+  }
+  /* Card brilha quando seção estiver ativa */
+  .toc-card {
+    transition: box-shadow 0.3s;
+  }
+</style>
+
+<script>
+  function initTOC() {
+    const links = document.querySelectorAll<HTMLAnchorElement>('.toc-link');
+    if (!links.length) return;
+
+    const ac = new AbortController();
+    const { signal } = ac;
+
+    const headingEls = Array.from(links)
+      .map(l => document.querySelector(l.getAttribute('href')!))
+      .filter(Boolean) as HTMLElement[];
+
+    // Highlight ativo no scroll
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            links.forEach(l => l.classList.remove('active'));
+            const active = document.querySelector<HTMLAnchorElement>(
+              `.toc-link[href="#${entry.target.id}"]`
+            );
+            active?.classList.add('active');
+          }
+        });
+      },
+      { rootMargin: '-20% 0% -70% 0%' }
+    );
+    headingEls.forEach(el => observer.observe(el));
+
+    // Flash no heading + glow no container de seção ao clicar no TOC
+    links.forEach(link => {
+      link.addEventListener('click', () => {
+        const targetId = link.getAttribute('href')?.slice(1);
+        if (!targetId) return;
+        const heading = document.getElementById(targetId);
+        if (!heading) return;
+
+        heading.classList.remove('heading-flash');
+        void heading.offsetWidth;
+        heading.classList.add('heading-flash');
+        heading.addEventListener('animationend', () => heading.classList.remove('heading-flash'), { once: true });
+
+        const section = heading.closest('.prose-section') as HTMLElement | null;
+        if (section) {
+          section.classList.remove('section-glow');
+          void section.offsetWidth;
+          section.classList.add('section-glow');
+          section.addEventListener('animationend', () => section.classList.remove('section-glow'), { once: true });
+        }
+      }, { signal });
+    });
+
+    document.addEventListener('astro:before-swap', () => {
+      observer.disconnect();
+      ac.abort();
+    }, { once: true });
+  }
+
+  document.addEventListener('astro:page-load', initTOC);
+  initTOC();
+</script>

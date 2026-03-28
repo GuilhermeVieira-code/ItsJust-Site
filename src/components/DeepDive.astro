@@ -1,0 +1,162 @@
+---
+interface Resource {
+  title: string;
+  url: string;
+  type?: 'youtube' | 'podcast' | 'newsletter' | 'course' | 'article';
+  description?: string;
+  author?: string;
+}
+
+interface Props {
+  extra?: Resource[];
+}
+
+const { extra = [] } = Astro.props;
+
+// ─── Curated defaults — atualize conforme desejar ────────────────────────────
+const defaults: Resource[] = [
+  {
+    type: 'youtube',
+    title: 'Lex Fridman Podcast',
+    url: 'https://youtube.com/@lexfridman',
+    description: 'Conversas profundas com os maiores nomes da IA, ciência e tecnologia.',
+    author: 'Lex Fridman',
+  },
+  {
+    type: 'youtube',
+    title: 'Two Minute Papers',
+    url: 'https://youtube.com/@TwoMinutePapers',
+    description: 'Os papers mais importantes de IA resumidos de forma acessível.',
+    author: 'Károly Zsolnai-Fehér',
+  },
+  {
+    type: 'youtube',
+    title: 'Andrej Karpathy',
+    url: 'https://youtube.com/@AndrejKarpathy',
+    description: 'Aulas profundas sobre redes neurais e LLMs pelo ex-diretor de IA da Tesla.',
+    author: 'Andrej Karpathy',
+  },
+  {
+    type: 'podcast',
+    title: 'The TWIML AI Podcast',
+    url: 'https://twimlai.com/podcast/',
+    description: 'Machine Learning e IA para profissionais — entrevistas com pesquisadores e practitioners.',
+    author: 'Sam Charrington',
+  },
+  {
+    type: 'podcast',
+    title: 'Inteligência Artificial — Hipsters',
+    url: 'https://www.hipsters.tech/',
+    description: 'O maior podcast de tecnologia do Brasil, com episódios dedicados à IA.',
+    author: 'Alura',
+  },
+  {
+    type: 'newsletter',
+    title: 'The Batch — DeepLearning.AI',
+    url: 'https://www.deeplearning.ai/the-batch/',
+    description: 'Newsletter semanal com as principais notícias de IA, por Andrew Ng.',
+    author: 'Andrew Ng',
+  },
+  {
+    type: 'newsletter',
+    title: 'MIT Technology Review',
+    url: 'https://www.technologyreview.com/',
+    description: 'Jornalismo tecnológico de excelência — sem hype, com profundidade.',
+    author: 'MIT',
+  },
+];
+
+const all = [...defaults, ...extra];
+
+const TYPE_CONFIG: Record<string, { label: string; icon: string; bg: string; text: string; border: string }> = {
+  youtube:    { label: 'YouTube',      icon: '▶', bg: 'bg-red-50',     text: 'text-red-600',     border: 'border-red-200' },
+  podcast:    { label: 'Podcast',      icon: '🎙', bg: 'bg-purple-50',  text: 'text-purple-600',  border: 'border-purple-200' },
+  newsletter: { label: 'Newsletter',   icon: '📰', bg: 'bg-sky-50',     text: 'text-sky-600',     border: 'border-sky-200' },
+  course:     { label: 'Curso',        icon: '📚', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
+  article:    { label: 'Artigo',       icon: '📝', bg: 'bg-amber-50',   text: 'text-amber-600',   border: 'border-amber-200' },
+};
+
+const groups = ['youtube', 'podcast', 'newsletter', 'course', 'article'] as const;
+const grouped = groups.map(type => ({
+  type,
+  config: TYPE_CONFIG[type],
+  items: all.filter(r => (r.type ?? 'article') === type),
+})).filter(g => g.items.length > 0);
+---
+
+{grouped.length > 0 && (
+  <section class="mt-14 border-t border-[#E8DCC8] pt-10">
+
+    <!-- Cabeçalho -->
+    <div class="flex items-center gap-3 mb-6">
+      <span class="text-2xl select-none" aria-hidden="true">🌻</span>
+      <div>
+        <h2 class="font-heading font-bold text-xl text-dark-brown leading-tight">
+          Se aprofunde em outros conteúdos
+        </h2>
+        <p class="font-body text-sm text-warm-gray mt-0.5">
+          Canais, podcasts e leituras que valem cada minuto do seu tempo.
+        </p>
+      </div>
+    </div>
+
+    <!-- Grupos por categoria -->
+    <div class="space-y-8">
+      {grouped.map(({ type, config, items }) => (
+        <div>
+          <!-- Label da categoria -->
+          <div class="flex items-center gap-2 mb-3">
+            <span class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold font-body border ${config.bg} ${config.text} ${config.border}`}>
+              <span aria-hidden="true">{config.icon}</span>
+              {config.label}
+            </span>
+            <div class="flex-1 h-px bg-[#E8DCC8]"></div>
+          </div>
+
+          <!-- Cards -->
+          <div class="grid sm:grid-cols-2 gap-3">
+            {items.map(r => (
+              <a
+                href={r.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group flex gap-3 p-4 rounded-xl border border-[#E8DCC8] bg-card-bg hover:border-gold/40 hover:bg-[#FFFBF0] transition-all duration-200 no-underline"
+              >
+                <!-- Ícone circular -->
+                <div class={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm ${config.bg} ${config.text} border ${config.border}`}>
+                  {config.icon}
+                </div>
+
+                <!-- Texto -->
+                <div class="min-w-0 flex-1">
+                  <p class="font-heading font-bold text-sm text-dark-brown group-hover:text-gold transition-colors duration-150 leading-snug truncate">
+                    {r.title}
+                  </p>
+                  {r.author && (
+                    <p class="font-body text-[10px] text-warm-gray mt-0.5">{r.author}</p>
+                  )}
+                  {r.description && (
+                    <p class="font-body text-xs text-warm-gray mt-1.5 leading-snug line-clamp-2">
+                      {r.description}
+                    </p>
+                  )}
+                </div>
+
+                <!-- Seta -->
+                <span class="text-warm-gray/40 group-hover:text-gold group-hover:translate-x-0.5 transition-all duration-150 flex-shrink-0 self-center text-xs">
+                  ↗
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Nota de rodapé -->
+    <p class="font-body text-[11px] text-warm-gray/60 mt-6 text-center italic">
+      Curadoria ItsJust — conteúdos selecionados por Guilherme Domingues.
+    </p>
+
+  </section>
+)}

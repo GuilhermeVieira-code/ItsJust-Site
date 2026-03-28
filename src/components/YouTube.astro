@@ -1,0 +1,61 @@
+---
+interface Props {
+  id: string;
+  title?: string;
+}
+const { id, title = 'Vídeo ItsJust' } = Astro.props;
+const thumb = `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+---
+
+<div class="youtube-embed my-8 rounded overflow-hidden shadow-[0_4px_16px_rgba(44,24,16,0.12)]">
+  <div
+    class="relative w-full cursor-pointer group"
+    style="padding-bottom: 56.25%"
+    data-video-id={id}
+    data-title={title}
+    id={`yt-${id}`}
+  >
+    <!-- Thumbnail -->
+    <img
+      src={thumb}
+      alt={title}
+      class="absolute inset-0 w-full h-full object-cover"
+      loading="lazy"
+    />
+    <!-- Overlay escuro -->
+    <div class="absolute inset-0 bg-dark-brown/40 group-hover:bg-dark-brown/20 transition-colors" />
+    <!-- Botão play -->
+    <button
+      aria-label={`Assistir: ${title}`}
+      class="absolute inset-0 flex items-center justify-center"
+    >
+      <div class="w-16 h-16 rounded-full bg-gold flex items-center justify-center shadow-lg group-hover:bg-amber group-hover:scale-110 transition-all">
+        <svg class="w-6 h-6 text-dark-brown ml-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </div>
+    </button>
+  </div>
+  {title && (
+    <p class="font-body text-xs text-warm-gray text-center py-2 px-4 bg-card-bg border-t border-[#E8DCC8]">
+      {title}
+    </p>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-video-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id    = el.dataset.videoId!;
+      const title = el.dataset.title ?? '';
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+      iframe.title = title;
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.className = 'absolute inset-0 w-full h-full';
+      el.innerHTML = '';
+      el.appendChild(iframe);
+    });
+  });
+</script>

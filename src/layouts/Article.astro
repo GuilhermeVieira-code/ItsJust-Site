@@ -1,0 +1,265 @@
+---
+import Base from './Base.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import SaibaMais from '../components/SaibaMais.astro';
+import DeepDive from '../components/DeepDive.astro';
+import RelatedArticles from '../components/RelatedArticles.astro';
+import YouTube from '../components/YouTube.astro';
+import SocialCTA from '../components/SocialCTA.astro';
+import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+
+interface Heading { depth: number; slug: string; text: string; }
+interface Resource { title: string; url: string; source?: string; }
+interface Article {
+  id: string;
+  data: {
+    title: string; description: string; date: Date;
+    section: string; subtopic: string; tags: string[];
+  };
+}
+
+interface DeepDiveItem {
+  title: string;
+  url: string;
+  type?: 'youtube' | 'podcast' | 'newsletter' | 'course' | 'article';
+  description?: string;
+  author?: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  updated?: Date;
+  section: string;
+  subtopic: string;
+  tags?: string[];
+  video?: string;
+  resources?: Resource[];
+  deepdive?: DeepDiveItem[];
+  headings: Heading[];
+  currentId: string;
+  subtopicArticles: Article[];
+  allArticles: Article[];
+}
+
+const {
+  title, description, date, updated,
+  section, subtopic, tags = [],
+  video, resources = [], deepdive = [],
+  headings, currentId,
+  allArticles,
+} = Astro.props;
+
+const sectionSlug  = SECTION_SLUG[section as keyof typeof SECTION_SLUG] ?? section.toLowerCase();
+const subtopicSlug = SUBTOPIC_SLUG[subtopic as keyof typeof SUBTOPIC_SLUG] ?? subtopic.toLowerCase();
+
+const dateStr    = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+const updatedStr = updated?.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+---
+
+<Base title={title} description={description} currentArticleId={currentId}>
+
+  <!-- Conteúdo principal — padding-left ajustado por CSS var + JS do sidebar -->
+  <div id="article-content-wrapper" class="min-h-screen">
+    <div class="max-w-[1120px] mx-auto px-6 lg:px-8 py-12">
+
+      <!-- Conteúdo do artigo (o TOC direito é fixed, fora do flex) -->
+      <div class="max-w-[860px]">
+
+        <!-- Coluna principal do artigo -->
+        <div>
+
+          <!-- Breadcrumb -->
+          <nav class="flex items-center gap-2 font-body text-xs text-warm-gray mb-8 reveal">
+            <a href="/" class="hover:text-gold transition-colors">Home</a>
+            <span>›</span>
+            <a href={`/${sectionSlug}`} class="hover:text-gold transition-colors capitalize">{sectionSlug}</a>
+            <span>›</span>
+            <a href={`/${sectionSlug}/${subtopicSlug}`} class="hover:text-gold transition-colors capitalize">{subtopicSlug}</a>
+          </nav>
+
+          <!-- Hero do artigo -->
+          <header class="mb-10 reveal reveal-delay-1">
+            <span class="tag mb-4 inline-block">{subtopic.replace('ItsJust', '')}</span>
+            <h1 class="font-heading font-bold text-3xl md:text-4xl text-dark-brown leading-tight mb-4">
+              {title}
+            </h1>
+            <p class="font-body text-lg text-warm-gray leading-relaxed mb-6">{description}</p>
+            <div class="flex flex-wrap items-center gap-3 font-body text-xs text-text-muted border-t border-card-bg pt-4">
+              <time datetime={date.toISOString()}>{dateStr}</time>
+              {updatedStr && <span>· Atualizado em {updatedStr}</span>}
+              {tags.length > 0 && (
+                <div class="flex gap-2 ml-auto flex-wrap justify-end">
+                  {tags.map(tag => <span class="tag">{tag}</span>)}
+                </div>
+              )}
+            </div>
+          </header>
+
+          <!-- Vídeo (se houver) -->
+          {video && (
+            <div class="mb-10 reveal reveal-delay-2">
+              <YouTube id={video} title={title} />
+            </div>
+          )}
+
+          <!-- Conteúdo do artigo -->
+          <div class="prose prose-itsjust max-w-none font-body reveal reveal-delay-2">
+            <slot />
+          </div>
+
+          <!-- Saiba mais -->
+          {resources.length > 0 && (
+            <div class="reveal">
+              <SaibaMais resources={resources} />
+            </div>
+          )}
+
+          <!-- Se aprofunde em outros conteúdos -->
+          <div class="reveal">
+            <DeepDive extra={deepdive} />
+          </div>
+
+          <!-- Rodapé — pétala de luz -->
+          <footer class="mt-14 reveal">
+            <div class="relative text-center py-8 px-6 rounded-xl bg-gradient-to-br from-card-bg to-[#FFF6D6] border border-[#E8DCC8] overflow-hidden">
+              <span class="absolute -top-4 -right-4 text-7xl opacity-[0.07] select-none pointer-events-none" aria-hidden="true">🌻</span>
+              <span class="absolute -bottom-4 -left-4 text-6xl opacity-[0.07] select-none pointer-events-none rotate-45" aria-hidden="true">🌻</span>
+              <div class="text-2xl mb-3">🌻</div>
+              <p class="font-heading italic text-lg text-warm-brown mb-2">
+                Se essa leitura acendeu algo em você...
+              </p>
+              <p class="font-body text-sm text-warm-gray max-w-sm mx-auto leading-relaxed">
+                Compartilhe com alguém que também precisa dessa luz.<br />
+                Cada leitura é uma pétala — pequena, mas cheia de significado.
+              </p>
+            </div>
+          </footer>
+
+          <!-- Comunidade e redes sociais -->
+          <div class="mt-10 reveal">
+            <SocialCTA variant="article" />
+          </div>
+
+          <!-- Artigos relacionados -->
+          <RelatedArticles
+            current={{ id: currentId, data: { title, description, date, section, subtopic, tags } }}
+            all={allArticles}
+          />
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TOC direito — fixo no xl+, colapsável em telas estreitas -->
+  <div id="article-toc-right">
+    <TableOfContents headings={headings} />
+  </div>
+
+  <!-- Backdrop para fechar TOC em mobile/tablet -->
+  <div id="toc-backdrop" class="fixed inset-0 bg-dark-brown/40 z-[39] backdrop-blur-[1px]"></div>
+
+  <!-- Botão flutuante para abrir TOC em telas estreitas -->
+  <button
+    id="toc-toggle-btn"
+    aria-label="Índice do artigo"
+    aria-expanded="false"
+    class="fixed bottom-20 right-4 z-50 w-11 h-11 rounded-full bg-dark-brown text-cream shadow-lg flex items-center justify-center border border-white/10 hover:bg-warm-brown transition-all duration-200 active:scale-95"
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+      <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+    </svg>
+  </button>
+
+</Base>
+
+<script>
+  // ─── TOC direito colapsável (mobile/tablet) ───────────────
+  function initTocToggle() {
+    const btn      = document.getElementById('toc-toggle-btn');
+    const toc      = document.getElementById('article-toc-right');
+    const backdrop = document.getElementById('toc-backdrop');
+    if (!btn || !toc) return;
+
+    const ac = new AbortController();
+    const { signal } = ac;
+
+    function openToc() {
+      toc.classList.add('toc-open');
+      backdrop?.classList.add('toc-open');
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeToc() {
+      toc.classList.remove('toc-open');
+      backdrop?.classList.remove('toc-open');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    btn.addEventListener('click', () => {
+      toc.classList.contains('toc-open') ? closeToc() : openToc();
+    }, { signal });
+
+    backdrop?.addEventListener('click', closeToc, { signal });
+
+    // Fecha ao clicar num link do TOC
+    toc.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        // pequeno delay para o scroll acontecer antes de fechar
+        setTimeout(closeToc, 150);
+      }, { signal });
+    });
+
+    document.addEventListener('astro:before-swap', () => {
+      closeToc();
+      ac.abort();
+    }, { once: true });
+  }
+
+  document.addEventListener('astro:page-load', initTocToggle);
+  initTocToggle();
+
+  // ─── Prose sections ───────────────────────────────────────
+  // Envolve seções separadas por <hr> em containers visuais
+  function buildProseSections() {
+    const prose = document.querySelector('.prose-itsjust');
+    if (!prose) return;
+
+    // Evita rodar duas vezes na mesma instância do artigo
+    if (prose.querySelector('.prose-section')) return;
+
+    const allNodes = Array.from(prose.childNodes);
+    const groups: Node[][] = [];
+    let current: Node[] = [];
+
+    allNodes.forEach(node => {
+      if (node.nodeName === 'HR') {
+        groups.push([...current]);
+        current = [];
+      } else {
+        current.push(node);
+      }
+    });
+    groups.push([...current]);
+
+    while (prose.firstChild) prose.removeChild(prose.firstChild);
+
+    groups.forEach(nodes => {
+      const hasContent = nodes.some(n => n.nodeType !== 3 || (n.textContent?.trim() ?? '') !== '');
+      if (!hasContent) return;
+      const div = document.createElement('div');
+      div.className = 'prose-section';
+      nodes.forEach(n => div.appendChild(n));
+      prose.appendChild(div);
+    });
+  }
+
+  // Roda no load inicial E após cada transição de página (View Transitions)
+  buildProseSections();
+  document.addEventListener('astro:page-load', buildProseSections);
+</script>

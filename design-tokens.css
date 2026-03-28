@@ -1,0 +1,79 @@
+/* ItsJust — Design Tokens v2.0 (Sunflower Edition) */
+/* Referência: Guia de Identidade Visual — Março 2026  */
+
+:root {
+  /* ── Primárias ───────────────────────────────────── */
+  --color-dark-brown:   #2C1810;
+  --color-warm-brown:   #4A3228;
+  --color-gold:         #D4A017;
+  --color-amber:        #F2A900;
+  --color-light-gold:   #FFD54F;
+  --color-cream:        #FFF8E7;
+
+  /* ── Suporte ─────────────────────────────────────── */
+  --color-off-white:    #FFFDF5;
+  --color-card-bg:      #FFFBF0;
+  --color-warm-gray:    #8B7355;
+  --color-text-muted:   #A69070;
+  --color-green:        #5B8C3E;
+  --color-red:          #C0392B;
+
+  /* ── Semânticas ──────────────────────────────────── */
+  --bg-primary-light:       var(--color-cream);
+  --bg-primary-dark:        var(--color-dark-brown);
+  --text-primary-light:     var(--color-dark-brown);
+  --text-primary-dark:      var(--color-cream);
+  --text-highlight-dark:    var(--color-light-gold);
+  --text-highlight-light:   var(--color-gold);
+  --accent:                 var(--color-gold);
+  --accent-hover:           var(--color-amber);
+
+  /* ── Tipografia ──────────────────────────────────── */
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body:    'Inter', Calibri, sans-serif;
+  --font-mono:    'JetBrains Mono', Consolas, monospace;
+
+  /* ── Escala tipográfica ───────────────────────────── */
+  --text-h1:   clamp(36px, 5vw, 44px);
+  --text-h2:   clamp(24px, 3.5vw, 28px);
+  --text-h3:   clamp(18px, 2.5vw, 22px);
+  --text-body: clamp(14px, 1.5vw, 16px);
+  --text-meta: clamp(9px, 1vw, 12px);
+
+  /* ── Sombras ─────────────────────────────────────── */
+  --shadow-card:     0 2px 8px rgba(44, 24, 16, 0.08);
+  --shadow-elevated: 0 4px 16px rgba(44, 24, 16, 0.12);
+
+  /* ── Espaçamento ─────────────────────────────────── */
+  --spacing-xs:  8px;
+  --spacing-sm:  16px;
+  --spacing-md:  24px;
+  --spacing-lg:  48px;
+  --spacing-xl:  80px;
+  --max-text-width: 720px;
+
+  /* ── Borda ────────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius-card: 4px;   /* máx 4px — sem arredondamento excessivo */
+  --border-accent-width: 4px; /* barra lateral/superior de cards */
+}
+
+/* ── Botão Primário ──────────────────────────────────
+   bg: Gold | text: Dark Brown | hover: Amber
+   padding: 12px 24px | border-radius: 4px
+─────────────────────────────────────────────────────── */
+
+/* ── Botão Secundário ────────────────────────────────
+   bg: transparent | border: 2px Gold | text: Gold
+   hover: bg Gold 10% opacity
+─────────────────────────────────────────────────────── */
+
+/* ── Card (fundo claro) ──────────────────────────────
+   bg: var(--color-card-bg) | shadow: var(--shadow-card)
+   border-radius: 4px | acento esq: 4-6px Gold
+─────────────────────────────────────────────────────── */
+
+/* ── Card (fundo escuro) ─────────────────────────────
+   bg: var(--color-warm-brown) | sem sombra
+   border-radius: 4px | acento sup: 4-6px Gold/Green/Red
+─────────────────────────────────────────────────────── */

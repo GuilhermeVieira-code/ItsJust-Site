@@ -1,0 +1,47 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="bg-dark-brown text-cream mt-20">
+  <div class="max-w-content mx-auto px-5 py-12">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+
+      <!-- Marca -->
+      <div class="flex flex-col items-center md:items-start gap-2">
+        <div class="flex items-center gap-2">
+          <img src="/images/logo.png" alt="ItsJust" width="24" height="24" class="w-6 h-6" />
+          <span class="font-heading font-bold text-gold text-lg">ItsJust</span>
+        </div>
+        <p class="font-body text-xs text-text-muted italic">Compartilhe Sua Luz</p>
+      </div>
+
+      <!-- Links -->
+      <nav class="flex gap-6 flex-wrap justify-center">
+        {[
+          { label: 'Tech',       href: '/tech' },
+          { label: 'Innovation', href: '/innovation' },
+          { label: 'People',     href: '/people' },
+          { label: 'Life',       href: '/life' },
+          { label: 'Sobre',      href: '/sobre' },
+        ].map(({ label, href }) => (
+          <a href={href} class="font-body text-sm text-text-muted hover:text-gold transition-colors">
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <!-- Contato -->
+      <div class="text-center md:text-right">
+        <a href="mailto:guivdom@gmail.com" class="font-body text-sm text-text-muted hover:text-gold transition-colors">
+          guivdom@gmail.com
+        </a>
+      </div>
+    </div>
+
+    <div class="divider border-warm-brown mt-8 mb-6"></div>
+
+    <p class="font-body text-xs text-text-muted text-center">
+      © {year} ItsJust. Tecnologia acessível para todos.
+    </p>
+  </div>
+</footer>

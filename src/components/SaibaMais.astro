@@ -1,0 +1,39 @@
+---
+interface Resource {
+  title: string;
+  url: string;
+  source?: string;
+}
+interface Props {
+  resources: Resource[];
+}
+const { resources } = Astro.props;
+---
+
+{resources.length > 0 && (
+  <aside class="my-10 card border-l-amber bg-off-white">
+    <p class="font-body text-xs font-semibold text-warm-gray uppercase tracking-wider mb-4">
+      🔗 Saiba mais
+    </p>
+    <ul class="space-y-3">
+      {resources.map(r => (
+        <li class="flex items-start gap-3">
+          <span class="text-gold mt-0.5 flex-shrink-0">→</span>
+          <div>
+            <a
+              href={r.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-body text-sm font-medium text-dark-brown hover:text-gold transition-colors underline decoration-gold/40 hover:decoration-gold"
+            >
+              {r.title}
+            </a>
+            {r.source && (
+              <p class="font-body text-xs text-warm-gray mt-0.5">{r.source}</p>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}

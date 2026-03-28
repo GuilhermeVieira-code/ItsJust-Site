@@ -1,0 +1,402 @@
+---
+import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+
+interface Article {
+  id: string;
+  data: {
+    title: string;
+    subtopic: string;
+    section: string;
+    tags: string[];
+  };
+}
+
+interface Props {
+  articles: Article[];
+}
+
+const { articles } = Astro.props;
+
+// ─── Monta nós e arestas para o grafo ───────────────────────────────────────
+
+type NodeData = {
+  id: string;
+  label: string;
+  type: 'hub' | 'subtopic' | 'article' | 'phantom';
+  subtopic?: string;
+  section?: string;
+  href?: string;
+  tags?: string[];
+};
+
+type EdgeData = { source: string; target: string; strength: number };
+
+const nodes: NodeData[] = [];
+const edges: EdgeData[] = [];
+
+// Hubs de seção (nós grandes, âncoras)
+const SECTIONS_USED = [...new Set(articles.map(a => a.data.section))];
+for (const sec of SECTIONS_USED) {
+  nodes.push({ id: `hub:${sec}`, label: sec.replace('ItsJust', ''), type: 'hub', section: sec });
+}
+
+// Nós de subtópico (nós médios)
+const SUBTOPICS_USED = [...new Set(articles.map(a => a.data.subtopic))];
+for (const sub of SUBTOPICS_USED) {
+  const sec = articles.find(a => a.data.subtopic === sub)?.data.section ?? '';
+  nodes.push({ id: `sub:${sub}`, label: sub.replace('ItsJust', ''), type: 'subtopic', subtopic: sub, section: sec });
+  edges.push({ source: `hub:${sec}`, target: `sub:${sub}`, strength: 0.8 });
+}
+
+// Nós de artigo
+for (const a of articles) {
+  const secSlug = SECTION_SLUG[a.data.section as keyof typeof SECTION_SLUG] ?? a.data.section.toLowerCase();
+  const subSlug = SUBTOPIC_SLUG[a.data.subtopic as keyof typeof SUBTOPIC_SLUG] ?? a.data.subtopic.toLowerCase();
+  const href = `/${secSlug}/${subSlug}/${a.id}`;
+  const shortTitle = a.data.title.length > 28 ? a.data.title.slice(0, 26) + '…' : a.data.title;
+  nodes.push({
+    id: a.id,
+    label: shortTitle,
+    type: 'article',
+    subtopic: a.data.subtopic,
+    section: a.data.section,
+    href,
+    tags: a.data.tags,
+  });
+  // Artigo → subtópico
+  edges.push({ source: `sub:${a.data.subtopic}`, target: a.id, strength: 0.6 });
+}
+
+// Arestas por tags compartilhadas
+for (let i = 0; i < articles.length; i++) {
+  for (let j = i + 1; j < articles.length; j++) {
+    const shared = articles[i].data.tags.filter(t => articles[j].data.tags.includes(t));
+    if (shared.length > 0) {
+      edges.push({ source: articles[i].id, target: articles[j].id, strength: 0.3 * shared.length });
+    }
+  }
+}
+
+// Nós fantasma para subtópicos futuros (enriquecem o grafo visualmente)
+const PHANTOMS = [
+  { id: 'ph:future',   label: 'Future',   section: 'ItsJustInnovation' },
+  { id: 'ph:leaders',  label: 'Leaders',  section: 'ItsJustPeople'     },
+  { id: 'ph:work',     label: 'Work',     section: 'ItsJustLife'       },
+  { id: 'ph:startups', label: 'Startups', section: 'ItsJustInnovation' },
+  { id: 'ph:dev',      label: 'Dev',      section: 'ItsJustTech'       },
+];
+for (const ph of PHANTOMS) {
+  const hubId = `hub:${ph.section}`;
+  // Só adiciona hub de seção se não existe
+  if (!nodes.find(n => n.id === hubId)) {
+    nodes.push({ id: hubId, label: ph.section.replace('ItsJust', ''), type: 'hub', section: ph.section });
+  }
+  nodes.push({ id: ph.id, label: ph.label, type: 'phantom', section: ph.section });
+  edges.push({ source: hubId, target: ph.id, strength: 0.4 });
+}
+
+const graphData = JSON.stringify({ nodes, edges });
+---
+
+<div id="kg-container" class="relative w-full h-full min-h-[420px] select-none" aria-label="Grafo de conhecimento ItsJust">
+  <canvas id="kg-canvas" class="w-full h-full rounded-2xl"></canvas>
+  <!-- Tooltip -->
+  <div id="kg-tooltip"
+    class="absolute pointer-events-none hidden z-20 bg-dark-brown/95 border border-gold/30 rounded-lg px-3 py-2 shadow-xl backdrop-blur-sm max-w-[200px]"
+  >
+    <p id="kg-tooltip-title" class="font-heading font-bold text-xs text-cream leading-snug"></p>
+    <p id="kg-tooltip-sub" class="font-body text-[10px] text-gold/70 mt-0.5"></p>
+    <p id="kg-tooltip-hint" class="font-body text-[10px] text-cream/40 mt-1 italic hidden">Clique para ler →</p>
+  </div>
+  <!-- Legenda -->
+  <div class="absolute bottom-3 left-3 flex items-center gap-3 opacity-50">
+    <span class="font-body text-[10px] text-cream/60">⬤ seção</span>
+    <span class="font-body text-[10px] text-cream/60">● subtópico</span>
+    <span class="font-body text-[10px] text-cream/60">• artigo</span>
+  </div>
+</div>
+
+<script define:vars={{ graphData }}>
+  // ─── Dados (imutáveis — definidos no servidor) ────────────────────────────
+  const { nodes: rawNodes, edges: rawEdges } = JSON.parse(graphData);
+
+  const COLORS = {
+    ItsJustAI: '#60a5fa', ItsJustDev: '#4ade80', ItsJustData: '#fb923c',
+    ItsJustFuture: '#c084fc', ItsJustStartups: '#f97316', ItsJustScience: '#34d399',
+    ItsJustLeaders: '#D4A017', ItsJustTeams: '#2dd4bf', ItsJustWork: '#facc15',
+    ItsJustSociety: '#f472b6', ItsJustTech: '#60a5fa', ItsJustInnovation: '#c084fc',
+    ItsJustPeople: '#D4A017', ItsJustLife: '#34d399',
+  };
+
+  function nodeColor(n) { return COLORS[n.subtopic] ?? COLORS[n.section] ?? '#D4A017'; }
+  function nodeRadius(n, scale = 1) {
+    return (n.type === 'hub' ? 11 : n.type === 'subtopic' ? 7 : n.type === 'phantom' ? 4 : 5.5) * scale;
+  }
+  function hexToRgb(hex) {
+    return `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`;
+  }
+
+  // ─── Estado da simulação (recriado a cada init) ───────────────────────────
+  let nodes = [], edges = [], nodeMap = {};
+  let W = 0, H = 0, dpr = 1;
+  let hoveredNode = null, dragging = null, dragOffX = 0, dragOffY = 0, tick = 0;
+  let animId = null;
+  let ro = null;
+  // Referências ao DOM — atualizadas a cada init()
+  let container, canvas, ctx, tooltip, ttTitle, ttSub, ttHint;
+
+  const K_REPEL = 4500, K_SPRING = 0.04, REST_LEN = 90, DAMPING = 0.82, CENTER_F = 0.012;
+
+  // ─── Funções puras (não dependem de DOM capturado no módulo) ──────────────
+  function resize() {
+    if (!container || !canvas) return;
+    const rect = container.getBoundingClientRect();
+    W = rect.width || 480;
+    H = rect.height || 420;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+
+  function simulate() {
+    nodes.forEach(n => { n.ax = 0; n.ay = 0; });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist2 = dx*dx + dy*dy + 0.01, dist = Math.sqrt(dist2);
+        const f = K_REPEL / dist2;
+        const fx = (dx/dist)*f, fy = (dy/dist)*f;
+        a.ax -= fx; a.ay -= fy; b.ax += fx; b.ay += fy;
+      }
+    }
+    edges.forEach(({ source: a, target: b, strength }) => {
+      const dx = b.x-a.x, dy = b.y-a.y, dist = Math.sqrt(dx*dx+dy*dy)||0.01;
+      const f = K_SPRING * strength * (dist - REST_LEN);
+      const fx = (dx/dist)*f, fy = (dy/dist)*f;
+      a.ax += fx; a.ay += fy; b.ax -= fx; b.ay -= fy;
+    });
+    const cx = W/2, cy = H/2;
+    const PAD = 24;
+    nodes.forEach(n => {
+      if (n === dragging) return;
+      n.ax += (cx - n.x) * CENTER_F;
+      n.ay += (cy - n.y) * CENTER_F;
+      n.vx = (n.vx + n.ax) * DAMPING;
+      n.vy = (n.vy + n.ay) * DAMPING;
+      n.x = Math.max(PAD, Math.min(W-PAD, n.x + n.vx));
+      n.y = Math.max(PAD, Math.min(H-PAD, n.y + n.vy));
+    });
+  }
+
+  function connectedSet(n) {
+    if (!n) return null;
+    const s = new Set([n.id]);
+    edges.forEach(e => {
+      if (e.source.id === n.id) s.add(e.target.id);
+      if (e.target.id === n.id) s.add(e.source.id);
+    });
+    return s;
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, W, H);
+    const connected = connectedSet(hoveredNode);
+    tick++;
+
+    edges.forEach(({ source: a, target: b }) => {
+      const hi = connected && connected.has(a.id) && connected.has(b.id);
+      const alpha = connected ? (hi ? 0.55 : 0.06) : 0.18;
+      const color = hi ? nodeColor(a.type === 'article' ? a : b) : '#E8DCC8';
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = `rgba(${hexToRgb(color)},${alpha})`;
+      ctx.lineWidth = hi ? 1.4 : 0.8; ctx.stroke();
+    });
+
+    nodes.forEach(n => {
+      const isHovered = hoveredNode?.id === n.id;
+      const isConn    = connected ? connected.has(n.id) : false;
+      const isDimmed  = connected && !isConn;
+      const isPhantom = n.type === 'phantom';
+      const pulse = isHovered ? 1 + 0.12 * Math.sin(tick * 0.12) : 1;
+      const r = nodeRadius(n, pulse), color = nodeColor(n), rgb = hexToRgb(color);
+
+      if (isHovered || isConn) {
+        const glowR = r + (isHovered ? 10 : 5);
+        const glow = ctx.createRadialGradient(n.x, n.y, r*0.5, n.x, n.y, glowR);
+        glow.addColorStop(0, `rgba(${rgb},${isHovered ? 0.45 : 0.2})`);
+        glow.addColorStop(1, `rgba(${rgb},0)`);
+        ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI*2);
+        ctx.fillStyle = glow; ctx.fill();
+      }
+
+      const alpha = isDimmed ? 0.15 : isPhantom ? 0.3 : 1;
+      ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI*2);
+      if (n.type === 'hub') {
+        ctx.fillStyle = `rgba(${rgb},${alpha*0.25})`; ctx.fill();
+        ctx.strokeStyle = `rgba(${rgb},${alpha*0.9})`; ctx.lineWidth = 2; ctx.stroke();
+      } else if (n.type === 'subtopic') {
+        ctx.fillStyle = `rgba(${rgb},${alpha*0.4})`; ctx.fill();
+        ctx.strokeStyle = `rgba(${rgb},${alpha*0.7})`; ctx.lineWidth = 1.5; ctx.stroke();
+      } else if (n.type === 'article') {
+        ctx.fillStyle = isHovered ? `rgba(${rgb},0.9)` : `rgba(${rgb},${alpha*0.75})`; ctx.fill();
+      } else {
+        ctx.fillStyle = `rgba(${rgb},0.12)`; ctx.fill();
+        ctx.strokeStyle = `rgba(${rgb},0.2)`; ctx.lineWidth = 1;
+        ctx.setLineDash([3,4]); ctx.stroke(); ctx.setLineDash([]);
+      }
+
+      if ((isHovered || isConn || n.type === 'hub') && !isPhantom) {
+        const la = isDimmed ? 0.2 : isHovered ? 1 : isConn ? 0.85 : 0.6;
+        ctx.font = n.type === 'hub' ? 'bold 11px Inter,sans-serif' : '10px Inter,sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillStyle = `rgba(255,240,210,${la})`;
+        ctx.shadowColor = 'rgba(20,10,6,0.9)'; ctx.shadowBlur = 6;
+        ctx.fillText(n.label, n.x, n.y + r + 4); ctx.shadowBlur = 0;
+      }
+    });
+  }
+
+  function loop() { simulate(); draw(); animId = requestAnimationFrame(loop); }
+
+  function showTooltip(n, x, y) {
+    if (!tooltip) return;
+    ttTitle.textContent = n.label;
+    ttSub.textContent   = (n.subtopic ?? n.section ?? '').replace('ItsJust', '');
+    ttHint.classList.toggle('hidden', n.type !== 'article');
+    tooltip.classList.remove('hidden');
+    let tx = x + 12, ty = y - 52;
+    if (tx + 210 > W) tx = x - 210 - 4;
+    if (ty < 0) ty = y + 16;
+    tooltip.style.left = tx + 'px'; tooltip.style.top = ty + 'px';
+  }
+  function hideTooltip() { tooltip?.classList.add('hidden'); }
+
+  function canvasPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: cx - rect.left, y: cy - rect.top };
+  }
+  function hitTest(x, y) {
+    for (let i = nodes.length-1; i >= 0; i--) {
+      const n = nodes[i], r = nodeRadius(n) + 4;
+      if ((x-n.x)**2 + (y-n.y)**2 < r*r) return n;
+    }
+    return null;
+  }
+
+  // ─── Init — captura o DOM FRESCO a cada chamada ───────────────────────────
+  function init() {
+    // 1. Para loop anterior
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    if (ro) { ro.disconnect(); ro = null; }
+
+    // 2. Captura elementos do DOM atual (pode ter sido trocado pelo View Transitions)
+    container = document.getElementById('kg-container');
+    canvas    = document.getElementById('kg-canvas');
+    tooltip   = document.getElementById('kg-tooltip');
+    ttTitle   = document.getElementById('kg-tooltip-title');
+    ttSub     = document.getElementById('kg-tooltip-sub');
+    ttHint    = document.getElementById('kg-tooltip-hint');
+
+    if (!container || !canvas) return; // não estamos na página do grafo
+    ctx = canvas.getContext('2d');
+
+    // 3. Reseta estado de interação
+    hoveredNode = null; dragging = null; tick = 0;
+
+    // 4. Recria nós físicos com posições iniciais frescas
+    resize();
+    const cx = W/2, cy = H/2;
+    nodeMap = {};
+    nodes = rawNodes.map((n, i) => {
+      const angle = (i / rawNodes.length) * Math.PI * 2;
+      const dist  = n.type === 'hub' ? 60 : n.type === 'subtopic' ? 120 : 180;
+      const nd = {
+        ...n,
+        x: cx + Math.cos(angle) * dist * (0.7 + Math.random() * 0.6),
+        y: cy + Math.sin(angle) * dist * (0.7 + Math.random() * 0.6),
+        vx: 0, vy: 0, ax: 0, ay: 0,
+      };
+      nodeMap[n.id] = nd;
+      return nd;
+    });
+    edges = rawEdges
+      .map(e => ({ source: nodeMap[e.source], target: nodeMap[e.target], strength: e.strength }))
+      .filter(e => e.source && e.target);
+
+    // 5. Registra eventos no canvas novo (AbortController limpa ao sair da página)
+    const ac = new AbortController();
+    const opts = { signal: ac.signal };
+
+    canvas.addEventListener('mousemove', e => {
+      const pos = canvasPos(e);
+      if (dragging) {
+        dragging.x = pos.x + dragOffX; dragging.y = pos.y + dragOffY;
+        dragging.vx = 0; dragging.vy = 0; return;
+      }
+      const hit = hitTest(pos.x, pos.y);
+      hoveredNode = hit;
+      canvas.style.cursor = hit ? 'pointer' : 'grab';
+      hit ? showTooltip(hit, pos.x, pos.y) : hideTooltip();
+    }, opts);
+
+    canvas.addEventListener('mousedown', e => {
+      const pos = canvasPos(e);
+      const hit = hitTest(pos.x, pos.y);
+      if (hit) { dragging = hit; dragOffX = hit.x-pos.x; dragOffY = hit.y-pos.y; canvas.style.cursor = 'grabbing'; e.preventDefault(); }
+    }, opts);
+
+    window.addEventListener('mouseup', () => {
+      if (dragging) { dragging.vx = 0; dragging.vy = 0; }
+      dragging = null;
+      if (canvas) canvas.style.cursor = hoveredNode ? 'pointer' : 'grab';
+    }, opts);
+
+    canvas.addEventListener('click', e => {
+      const pos = canvasPos(e);
+      const hit = hitTest(pos.x, pos.y);
+      if (hit?.type === 'article' && hit.href) window.location.href = hit.href;
+    }, opts);
+
+    canvas.addEventListener('touchstart', e => {
+      const pos = canvasPos(e);
+      const hit = hitTest(pos.x, pos.y);
+      if (hit) { dragging = hit; dragOffX = hit.x-pos.x; dragOffY = hit.y-pos.y; }
+      e.preventDefault();
+    }, { ...opts, passive: false });
+
+    canvas.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      const pos = canvasPos(e);
+      dragging.x = pos.x + dragOffX; dragging.y = pos.y + dragOffY;
+      e.preventDefault();
+    }, { ...opts, passive: false });
+
+    canvas.addEventListener('touchend', () => { dragging = null; }, opts);
+
+    // ResizeObserver no container novo
+    ro = new ResizeObserver(() => resize());
+    ro.observe(container);
+
+    // Limpa tudo quando o próximo swap acontecer
+    document.addEventListener('astro:before-swap', () => {
+      ac.abort();
+      if (animId) cancelAnimationFrame(animId);
+      if (ro) ro.disconnect();
+    }, { once: true });
+
+    // 6. Inicia loop
+    loop();
+  }
+
+  // Roda no load inicial e após cada transição
+  init();
+  document.addEventListener('astro:page-load', init);
+</script>

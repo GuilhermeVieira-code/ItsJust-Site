@@ -1,0 +1,61 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+
+interface Article {
+  id: string;
+  data: {
+    title: string;
+    description: string;
+    date: Date;
+    section: string;
+    subtopic: string;
+    tags: string[];
+  };
+}
+
+interface Props {
+  current: Article;
+  all: Article[];
+  max?: number;
+}
+
+const { current, all, max = 3 } = Astro.props;
+
+// Pontuação de relevância: mesmo subtópico = 2pts, tag em comum = 1pt cada
+function score(a: Article): number {
+  let pts = 0;
+  if (a.data.subtopic === current.data.subtopic) pts += 2;
+  const sharedTags = a.data.tags.filter(t => current.data.tags.includes(t));
+  pts += sharedTags.length;
+  return pts;
+}
+
+const related = all
+  .filter(a => a.id !== current.id)
+  .map(a => ({ article: a, score: score(a) }))
+  .sort((a, b) => b.score - a.score || b.article.data.date.valueOf() - a.article.data.date.valueOf())
+  .slice(0, max)
+  .map(r => r.article);
+---
+
+{related.length > 0 && (
+  <section class="mt-14 pt-10 border-t border-card-bg">
+    <h2 class="font-heading font-bold text-xl text-dark-brown mb-6">
+      Continue lendo
+    </h2>
+    <div class="grid md:grid-cols-3 gap-5">
+      {related.map(article => (
+        <ArticleCard
+          title={article.data.title}
+          description={article.data.description}
+          date={article.data.date}
+          section={article.data.section}
+          subtopic={article.data.subtopic}
+          slug={article.id}
+          tags={article.data.tags}
+        />
+      ))}
+    </div>
+  </section>
+)}

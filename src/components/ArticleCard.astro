@@ -1,0 +1,106 @@
+---
+import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+
+interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  section: string;
+  subtopic: string;
+  slug: string;
+  tags?: string[];
+  cover?: string;
+  video?: string;
+}
+
+const { title, description, date, section, subtopic, slug, tags = [], cover, video } = Astro.props;
+
+// Se não há cover mas há vídeo, usa a thumbnail do YouTube (maxresdefault com fallback para hqdefault)
+const bannerImage = cover ?? (video ? `https://img.youtube.com/vi/${video}/maxresdefault.jpg` : undefined);
+
+const sectionSlug  = SECTION_SLUG[section as keyof typeof SECTION_SLUG] ?? section.toLowerCase();
+const subtopicSlug = SUBTOPIC_SLUG[subtopic as keyof typeof SUBTOPIC_SLUG] ?? subtopic.toLowerCase();
+const href         = `/${sectionSlug}/${subtopicSlug}/${slug}`;
+const dateStr      = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+// Banner gradient e ícone por subtópico
+const BANNER: Record<string, { gradient: string; emoji: string; accent: string }> = {
+  ItsJustAI:       { gradient: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1a3050 100%)', emoji: '🤖', accent: '#60a5fa' },
+  ItsJustDev:      { gradient: 'linear-gradient(135deg, #0f2018 0%, #1a3d2b 60%, #0d2920 100%)', emoji: '💻', accent: '#4ade80' },
+  ItsJustData:     { gradient: 'linear-gradient(135deg, #1a1208 0%, #2d2010 60%, #3d2d14 100%)', emoji: '📊', accent: '#fb923c' },
+  ItsJustFuture:   { gradient: 'linear-gradient(135deg, #1a0d2e 0%, #2d1a4a 60%, #1e0f36 100%)', emoji: '🔭', accent: '#c084fc' },
+  ItsJustStartups: { gradient: 'linear-gradient(135deg, #2a0e00 0%, #4a1e05 60%, #3d1508 100%)', emoji: '🚀', accent: '#f97316' },
+  ItsJustScience:  { gradient: 'linear-gradient(135deg, #0a1a10 0%, #122b1c 60%, #0d2016 100%)', emoji: '🔬', accent: '#34d399' },
+  ItsJustLeaders:  { gradient: 'linear-gradient(135deg, #1a1208 0%, #2d2010 60%, #241808 100%)', emoji: '👥', accent: '#D4A017' },
+  ItsJustTeams:    { gradient: 'linear-gradient(135deg, #0f1a1a 0%, #1a2d2d 60%, #0d2020 100%)', emoji: '🤝', accent: '#2dd4bf' },
+  ItsJustWork:     { gradient: 'linear-gradient(135deg, #1a1700 0%, #2d2a05 60%, #242108 100%)', emoji: '⚡', accent: '#facc15' },
+  ItsJustSociety:  { gradient: 'linear-gradient(135deg, #1a0a14 0%, #2d1422 60%, #20101a 100%)', emoji: '🌍', accent: '#f472b6' },
+};
+
+const banner = BANNER[subtopic] ?? { gradient: 'linear-gradient(135deg, #2C1810 0%, #3d2518 100%)', emoji: '🌻', accent: '#D4A017' };
+---
+
+<article class="card group flex flex-col overflow-hidden p-0">
+
+  <!-- Banner visual: thumbnail do vídeo, cover ou gradiente por subtópico -->
+  <a href={href} class="block no-underline flex-shrink-0" tabindex="-1" aria-hidden="true">
+    {bannerImage
+      ? <img src={bannerImage} alt="" class="w-full h-32 object-cover" loading="lazy" />
+      : (
+        <div
+          class="w-full h-32 flex items-center justify-center relative overflow-hidden"
+          style={`background: ${banner.gradient};`}
+        >
+          <!-- Textura sutil -->
+          <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%);"></div>
+          <!-- Ícone central -->
+          <span class="text-4xl opacity-60 select-none z-10">{banner.emoji}</span>
+          <!-- Dot accent no canto -->
+          <div class="absolute bottom-3 right-4 flex gap-1 items-center">
+            <div class="w-1.5 h-1.5 rounded-full" style={`background: ${banner.accent}; opacity: 0.7;`}></div>
+            <span class="text-[10px] font-semibold tracking-widest opacity-50 text-white">{subtopic.replace('ItsJust', '').toUpperCase()}</span>
+          </div>
+        </div>
+      )
+    }
+  </a>
+
+  <!-- Corpo do card -->
+  <div class="flex flex-col gap-3 p-4 flex-1">
+
+    <!-- Subtópico + data em linha -->
+    <div class="flex items-center justify-between">
+      <span class="tag-gold">{subtopic.replace('ItsJust', '')}</span>
+      <time class="font-body text-xs text-text-muted">{dateStr}</time>
+    </div>
+
+    <!-- Título -->
+    <h2 class="font-heading font-bold text-xl text-dark-brown group-hover:text-gold transition-colors duration-200 leading-snug">
+      <a href={href} class="no-underline hover:no-underline">{title}</a>
+    </h2>
+
+    <!-- Descrição -->
+    <p class="font-body text-sm text-warm-gray leading-relaxed line-clamp-3 flex-1">{description}</p>
+
+    <!-- Tags -->
+    {tags.length > 0 && (
+      <div class="flex flex-wrap gap-1.5">
+        {tags.slice(0, 3).map(tag => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+    )}
+
+    <!-- CTA -->
+    <div class="flex items-center justify-end mt-auto pt-3 border-t border-[#E8DCC8]">
+      <a
+        href={href}
+        class="btn-ghost text-xs font-semibold group-hover:gap-2.5 transition-all"
+      >
+        Ler artigo
+        <span class="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
+      </a>
+    </div>
+  </div>
+
+</article>

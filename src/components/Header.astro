@@ -1,0 +1,37 @@
+---
+---
+
+<header id="site-header" class="bg-cream border-b border-card-bg sticky top-0 z-50 transition-[padding-left,box-shadow] duration-300">
+  <div class="max-w-content mx-auto px-5 flex items-center justify-between h-16">
+
+    <!-- Logo (some no desktop quando sidebar está aberta) -->
+    <a id="header-logo" href="/" class="flex items-center gap-2 no-underline group">
+      <img src="/images/logo.png" alt="ItsJust logo" width="32" height="32"
+           class="w-8 h-8 transition-transform duration-200 group-hover:scale-110" />
+      <span class="font-heading font-bold text-xl text-gold group-hover:text-amber transition-colors">
+        ItsJust
+      </span>
+    </a>
+
+    <!-- Botão de menu mobile (abre sidebar) -->
+    <button id="menu-btn" class="lg:hidden text-warm-brown hover:text-gold p-2 rounded transition-colors" aria-label="Menu">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+  </div>
+</header>
+
+<script>
+  // Scroll shadow
+  const header = document.getElementById('site-header')!;
+  const onScroll = () => {
+    if (window.scrollY > 8) {
+      header.classList.add('shadow-[0_4px_16px_rgba(44,24,16,0.10)]');
+    } else {
+      header.classList.remove('shadow-[0_4px_16px_rgba(44,24,16,0.10)]');
+    }
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+</script>

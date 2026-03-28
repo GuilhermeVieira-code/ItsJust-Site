@@ -1,0 +1,336 @@
+---
+import { getCollection } from 'astro:content';
+import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+
+interface Props {
+  currentId?: string;
+}
+const { currentId } = Astro.props;
+
+const allArticles = await getCollection('articles', ({ data }) => data.status === 'published');
+allArticles.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const bySubtopic: Record<string, typeof allArticles> = {};
+for (const a of allArticles) {
+  if (!bySubtopic[a.data.subtopic]) bySubtopic[a.data.subtopic] = [];
+  bySubtopic[a.data.subtopic].push(a);
+}
+
+const currentSubtopic = allArticles.find(a => a.id === currentId)?.data.subtopic ?? '';
+const currentSectionKey = allArticles.find(a => a.id === currentId)?.data.section ?? '';
+
+const NAV = [
+  { label: 'Tech',       sectionKey: 'ItsJustTech',
+    subtopics: [{ id: 'ItsJustAI', label: 'AI' }, { id: 'ItsJustDev', label: 'Dev' }, { id: 'ItsJustData', label: 'Data' }] },
+  { label: 'Innovation', sectionKey: 'ItsJustInnovation',
+    subtopics: [{ id: 'ItsJustFuture', label: 'Future' }, { id: 'ItsJustStartups', label: 'Startups' }, { id: 'ItsJustScience', label: 'Science' }] },
+  { label: 'People',     sectionKey: 'ItsJustPeople',
+    subtopics: [{ id: 'ItsJustLeaders', label: 'Leaders' }, { id: 'ItsJustTeams', label: 'Teams' }] },
+  { label: 'Life',       sectionKey: 'ItsJustLife',
+    subtopics: [{ id: 'ItsJustWork', label: 'Work' }, { id: 'ItsJustSociety', label: 'Society' }] },
+];
+---
+
+<!-- Sidebar fixa — começa no topo para logo alinhar com o header -->
+<aside
+  id="article-sidebar"
+  class="fixed left-0 top-0 bottom-0 w-72 z-50
+         bg-off-white border-r border-[#E8DCC8]
+         shadow-[2px_0_20px_rgba(44,24,16,0.07)]
+         flex flex-col
+         transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+         -translate-x-full lg:translate-x-0"
+>
+  <!-- Logo — mesma altura do header (h-16) para alinhar perfeitamente -->
+  <div class="flex items-center justify-between px-4 h-16 border-b border-[#E8DCC8] flex-shrink-0">
+    <a href="/" class="flex items-center gap-2 no-underline group">
+      <img src="/images/logo.png" alt="ItsJust" width="28" height="28"
+           class="w-7 h-7 transition-transform duration-200 group-hover:scale-110" />
+      <span class="font-heading font-bold text-lg text-gold group-hover:text-amber transition-colors">
+        ItsJust
+      </span>
+    </a>
+    <button
+      id="sidebar-close"
+      class="p-1.5 rounded-md hover:bg-gold/10 text-warm-gray hover:text-gold transition-colors"
+      aria-label="Recolher menu"
+      title="Recolher"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Nav scrollável -->
+  <nav class="flex-1 overflow-y-auto overscroll-contain py-3 px-2.5 flex flex-col">
+
+    <!-- Home -->
+    <a href="/" class="flex items-center gap-2.5 px-3 py-2.5 rounded-md font-body text-base font-medium text-warm-brown hover:text-gold hover:bg-gold/5 transition-colors mb-1">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Home
+    </a>
+
+    <div class="my-2 border-t border-[#E8DCC8]"></div>
+
+    <!-- Seções colapsáveis -->
+    {NAV.map(({ label, sectionKey, subtopics }) => {
+      const isSectionOpen = subtopics.some(s => s.id === currentSubtopic) || sectionKey === currentSectionKey;
+      return (
+        <details class="nav-details" open={isSectionOpen || undefined}>
+          <summary class="flex items-center justify-between px-3 py-2.5 rounded-md cursor-pointer font-body text-base font-semibold text-warm-brown hover:text-gold hover:bg-gold/5 transition-colors select-none list-none mb-0.5">
+            <span>{label}</span>
+            <svg class="nav-chevron w-4 h-4 text-warm-gray flex-shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </summary>
+
+          <div class="ml-2 mb-1 space-y-0.5">
+            {subtopics.map(({ id, label: subLabel }) => {
+              const articles = bySubtopic[id] ?? [];
+              const isCurrentSub = id === currentSubtopic;
+
+              if (articles.length === 0) {
+                return (
+                  <div class="flex items-center gap-2 px-3 py-2 rounded-md font-body text-sm text-text-muted">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current opacity-30 flex-shrink-0"></span>
+                    <span>{subLabel}</span>
+                    <span class="ml-auto text-[11px] opacity-50">em breve</span>
+                  </div>
+                );
+              }
+
+              return (
+                <details class="nav-details" open={isCurrentSub || undefined}>
+                  <summary class:list={[
+                    'flex items-center justify-between px-3 py-2 rounded-md cursor-pointer font-body text-sm font-medium transition-colors select-none list-none',
+                    isCurrentSub ? 'text-gold font-semibold bg-gold/5' : 'text-warm-brown hover:text-gold hover:bg-gold/5',
+                  ]}>
+                    <span class="flex items-center gap-2">
+                      <span class:list={['w-1.5 h-1.5 rounded-full flex-shrink-0', isCurrentSub ? 'bg-gold' : 'bg-warm-gray opacity-40']}></span>
+                      {subLabel}
+                      <span class="text-[11px] text-text-muted opacity-70">({articles.length})</span>
+                    </span>
+                    <svg class="nav-chevron w-3.5 h-3.5 opacity-40 flex-shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </summary>
+
+                  <ul class="ml-3 mt-0.5 mb-1 space-y-0.5">
+                    {articles.slice(0, 8).map(a => {
+                      const sec = SECTION_SLUG[a.data.section as keyof typeof SECTION_SLUG];
+                      const sub = SUBTOPIC_SLUG[a.data.subtopic as keyof typeof SUBTOPIC_SLUG];
+                      const href = `/${sec}/${sub}/${a.id}`;
+                      const isCurrent = a.id === currentId;
+                      return (
+                        <li>
+                          <a
+                            href={href}
+                            class:list={[
+                              'block px-3 py-2 rounded-md font-body text-sm leading-snug transition-all duration-150 border-l-2',
+                              isCurrent
+                                ? 'border-gold text-gold font-semibold bg-gold/10'
+                                : 'border-transparent text-warm-gray hover:text-gold hover:border-gold/30 hover:bg-gold/5',
+                            ]}
+                          >
+                            {a.data.title}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </details>
+              );
+            })}
+          </div>
+        </details>
+      );
+    })}
+
+    <div class="my-2 border-t border-[#E8DCC8]"></div>
+
+    <!-- Tools & Solutions -->
+    <details class="nav-details">
+      <summary class="flex items-center justify-between px-3 py-2.5 rounded-md cursor-pointer font-body text-base font-semibold text-warm-brown hover:text-gold hover:bg-gold/5 transition-colors select-none list-none mb-0.5">
+        <span class="flex items-center gap-2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-60">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          Tools &amp; Solutions
+        </span>
+        <svg class="nav-chevron w-4 h-4 text-warm-gray flex-shrink-0 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </summary>
+
+      <div class="ml-2 mb-1 space-y-0.5">
+
+        <!-- Ferramentas próprias (GitHub) -->
+        <p class="px-3 pt-1 pb-0.5 font-body text-[10px] font-semibold text-text-muted uppercase tracking-wider">Open Source</p>
+        {[
+          { name: 'ItsJustNotes',              status: 'live', url: 'https://github.com/ItsJust-Code/ItsJustNotes' },
+          { name: 'Local ML Translator',        status: 'soon', url: '#' },
+          { name: 'Breast Cancer Classifier',   status: 'soon', url: '#' },
+        ].map(({ name, status, url }) => (
+          <a
+            href={status === 'live' ? url : undefined}
+            target={status === 'live' ? '_blank' : undefined}
+            rel={status === 'live' ? 'noopener noreferrer' : undefined}
+            class:list={[
+              'flex items-center justify-between px-3 py-2 rounded-md font-body text-sm transition-colors group no-underline',
+              status === 'live'
+                ? 'text-warm-gray hover:text-gold hover:bg-gold/5 cursor-pointer'
+                : 'text-text-muted cursor-default',
+            ]}
+          >
+            <span class="flex items-center gap-2">
+              <span class:list={['w-1.5 h-1.5 rounded-full flex-shrink-0', status === 'live' ? 'bg-green-400 opacity-70' : 'bg-warm-gray opacity-20']}></span>
+              {name}
+            </span>
+            <span class="text-[10px] opacity-0 group-hover:opacity-60 transition-opacity text-gold">
+              {status === 'live' ? 'GitHub ↗' : 'em breve'}
+            </span>
+          </a>
+        ))}
+
+        <!-- Parcerias -->
+        <p class="px-3 pt-3 pb-0.5 font-body text-[10px] font-semibold text-text-muted uppercase tracking-wider">Parcerias</p>
+        <div class="px-3 py-2 rounded-md">
+          <p class="font-body text-xs text-text-muted italic">Em seleção — quer ser parceiro?</p>
+          <a
+            href="mailto:guivdom@gmail.com?subject=Parceria%20ItsJust%20Tools"
+            class="inline-flex items-center gap-1 text-[11px] font-semibold text-gold/60 hover:text-gold transition-colors no-underline mt-1"
+          >
+            Entre em contato →
+          </a>
+        </div>
+
+        <!-- Link para o carrossel na home -->
+        <a href="/#ferramentas" class="flex items-center gap-2 px-3 py-2 rounded-md font-body text-xs text-gold/50 hover:text-gold transition-colors no-underline">
+          Ver todas as ferramentas →
+        </a>
+      </div>
+    </details>
+
+    <!-- Spacer que empurra o "Sobre" para o fundo -->
+    <div class="flex-1 min-h-4"></div>
+
+    <!-- Sobre o ItsJust — botão estilizado como card -->
+    <a
+      href="/sobre"
+      class="group mx-1 mb-2 flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 hover:border-gold/40 hover:from-gold/15 hover:to-gold/10 transition-all duration-200 no-underline"
+    >
+      <div class="w-8 h-8 rounded-lg bg-gold/15 flex items-center justify-center flex-shrink-0 group-hover:bg-gold/25 transition-colors">
+        <span class="text-base leading-none">🌻</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-heading font-bold text-sm text-warm-brown group-hover:text-gold transition-colors leading-tight">Sobre o ItsJust</p>
+        <p class="font-body text-[11px] text-warm-gray/70 leading-tight mt-0.5">Missão, girassol e quem somos</p>
+      </div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gold/40 group-hover:text-gold/70 flex-shrink-0 group-hover:translate-x-0.5 transition-all">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </a>
+
+  </nav>
+</aside>
+
+<!-- Overlay mobile -->
+<div
+  id="sidebar-overlay"
+  class="hidden fixed inset-0 bg-dark-brown/40 backdrop-blur-[2px] z-40 lg:hidden"
+></div>
+
+<!-- Aba para reabrir (sidebar recolhida) — tamanho touch-friendly -->
+<button
+  id="sidebar-open"
+  class="fixed top-1/2 -translate-y-1/2 left-0 z-40
+         flex flex-col items-center justify-center gap-1.5
+         w-9 h-24 bg-card-bg border border-[#E8DCC8] border-l-0
+         rounded-r-xl shadow-[2px_0_12px_rgba(44,24,16,0.13)]
+         text-warm-gray hover:text-gold hover:bg-gold/10 active:bg-gold/20
+         transition-all duration-200
+         opacity-0 pointer-events-none"
+  aria-label="Abrir navegação"
+  title="Abrir navegação"
+>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18l6-6-6-6"/>
+  </svg>
+  <span class="text-[9px] font-semibold tracking-widest" style="writing-mode: vertical-rl; transform: rotate(180deg);">MENU</span>
+</button>
+
+<style>
+  .nav-details > summary::-webkit-details-marker { display: none; }
+  .nav-details[open] > summary .nav-chevron { transform: rotate(90deg); }
+</style>
+
+<script>
+  const STORAGE_KEY = 'itsjust-sidebar';
+  const W = '18rem';
+
+  function initSidebar() {
+    const sidebar  = document.getElementById('article-sidebar') as HTMLElement | null;
+    const overlay  = document.getElementById('sidebar-overlay') as HTMLElement | null;
+    const openBtn  = document.getElementById('sidebar-open') as HTMLElement | null;
+    const closeBtn = document.getElementById('sidebar-close') as HTMLElement | null;
+    const menuBtn  = document.getElementById('menu-btn') as HTMLElement | null;
+    const header   = document.getElementById('site-header') as HTMLElement | null;
+    const wrapper  = document.getElementById('article-content-wrapper') as HTMLElement | null;
+    const pageMain = document.getElementById('page-main') as HTMLElement | null;
+    const contentEl = wrapper ?? pageMain;
+
+    if (!sidebar || !openBtn || !closeBtn || !overlay) return;
+
+    function openSidebar() {
+      sidebar!.classList.remove('-translate-x-full');
+      openBtn!.classList.add('opacity-0', 'pointer-events-none');
+      document.body.setAttribute('data-sidebar', 'open');
+      if (window.innerWidth < 1024) {
+        overlay!.classList.remove('hidden');
+      } else {
+        contentEl?.style.setProperty('--sidebar-w', W);
+        if (!wrapper && pageMain) pageMain.style.paddingLeft = W;
+        if (header) header.style.paddingLeft = W;
+      }
+      try { localStorage.setItem(STORAGE_KEY, '1'); } catch {}
+    }
+
+    function closeSidebar() {
+      sidebar!.classList.add('-translate-x-full');
+      openBtn!.classList.remove('opacity-0', 'pointer-events-none');
+      overlay!.classList.add('hidden');
+      document.body.setAttribute('data-sidebar', 'closed');
+      contentEl?.style.setProperty('--sidebar-w', '0px');
+      if (!wrapper && pageMain) pageMain.style.paddingLeft = '';
+      if (header) header.style.paddingLeft = '';
+      try { localStorage.setItem(STORAGE_KEY, '0'); } catch {}
+    }
+
+    // Usa AbortController para limpar listeners antigos ao re-inicializar
+    const ac = new AbortController();
+    const opts = { signal: ac.signal };
+
+    openBtn.addEventListener('click', openSidebar, opts);
+    closeBtn.addEventListener('click', closeSidebar, opts);
+    overlay.addEventListener('click', closeSidebar, opts);
+    menuBtn?.addEventListener('click', openSidebar, opts);
+
+    // Limpa listeners quando o próximo page-load acontecer
+    document.addEventListener('astro:before-swap', () => ac.abort(), { once: true });
+
+    // Estado inicial
+    const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch { return null; } })();
+    if (window.innerWidth >= 1024) {
+      saved === '0' ? closeSidebar() : openSidebar();
+    } else {
+      closeSidebar(); // móvel: sempre começa fechado, hamburger abre
+    }
+  }
+
+  // Inicializa no load normal e após cada transição de página
+  initSidebar();
+  document.addEventListener('astro:page-load', initSidebar);
+</script>
