@@ -66,7 +66,6 @@ const filtered = headings.filter(h => h.depth === 2 || h.depth === 3);
   .toc-link.active .toc-dot {
     background-color: #D4A017;
   }
-  /* Card brilha quando seção estiver ativa */
   .toc-card {
     transition: box-shadow 0.3s;
   }
@@ -84,7 +83,6 @@ const filtered = headings.filter(h => h.depth === 2 || h.depth === 3);
       .map(l => document.querySelector(l.getAttribute('href')!))
       .filter(Boolean) as HTMLElement[];
 
-    // Highlight ativo no scroll
     const observer = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
@@ -101,7 +99,6 @@ const filtered = headings.filter(h => h.depth === 2 || h.depth === 3);
     );
     headingEls.forEach(el => observer.observe(el));
 
-    // Flash no heading + glow no container de seção ao clicar no TOC
     links.forEach(link => {
       link.addEventListener('click', () => {
         const targetId = link.getAttribute('href')?.slice(1);

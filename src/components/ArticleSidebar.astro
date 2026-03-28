@@ -234,6 +234,23 @@ const NAV = [
       </svg>
     </a>
 
+    <!-- Fale Conosco — CTA de contato -->
+    <a
+      href="mailto:guivdom@gmail.com?subject=Contato%20ItsJust"
+      class="group mx-1 mb-3 flex items-center gap-3 p-3 rounded-xl bg-dark-brown hover:bg-warm-brown border border-dark-brown/80 transition-all duration-200 no-underline"
+    >
+      <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/15 transition-colors">
+        <span class="text-base leading-none">✉️</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-heading font-bold text-sm text-light-gold leading-tight">Fale Conosco</p>
+        <p class="font-body text-[11px] text-cream/50 leading-tight mt-0.5">Palestras, parcerias ou papo sobre IA</p>
+      </div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gold/40 group-hover:text-gold/70 flex-shrink-0 group-hover:translate-x-0.5 transition-all">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </a>
+
   </nav>
 </aside>
 
@@ -309,7 +326,6 @@ const NAV = [
       try { localStorage.setItem(STORAGE_KEY, '0'); } catch {}
     }
 
-    // Usa AbortController para limpar listeners antigos ao re-inicializar
     const ac = new AbortController();
     const opts = { signal: ac.signal };
 
@@ -318,19 +334,16 @@ const NAV = [
     overlay.addEventListener('click', closeSidebar, opts);
     menuBtn?.addEventListener('click', openSidebar, opts);
 
-    // Limpa listeners quando o próximo page-load acontecer
     document.addEventListener('astro:before-swap', () => ac.abort(), { once: true });
 
-    // Estado inicial
     const saved = (() => { try { return localStorage.getItem(STORAGE_KEY); } catch { return null; } })();
     if (window.innerWidth >= 1024) {
       saved === '0' ? closeSidebar() : openSidebar();
     } else {
-      closeSidebar(); // móvel: sempre começa fechado, hamburger abre
+      closeSidebar();
     }
   }
 
-  // Inicializa no load normal e após cada transição de página
   initSidebar();
   document.addEventListener('astro:page-load', initSidebar);
 </script>
