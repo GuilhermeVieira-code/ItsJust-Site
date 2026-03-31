@@ -32,6 +32,16 @@ export const SUBTOPIC_SLUG: Record<typeof SUBTOPICS[number], string> = {
   ItsJustSociety:  'society',
 };
 
+type ArticleLike = { id: string; data?: { slug?: string } };
+
+export function normalizeArticleSlug(value: string): string {
+  return value.replace(/\.mdx$/i, '').replace(/^\/+|\/+$/g, '');
+}
+
+export function getArticleSlug(article: ArticleLike): string {
+  return normalizeArticleSlug(article.data?.slug ?? article.id);
+}
+
 const articles = defineCollection({
   type: 'content',
   schema: z.object({
@@ -43,6 +53,7 @@ const articles = defineCollection({
     tags:        z.array(z.string()).default([]),
     section:     z.enum(SECTIONS),
     subtopic:    z.enum(SUBTOPICS),
+    slug:        z.string().optional(),
     cover:       z.string().optional(),
     video:       z.string().optional(),  // YouTube video ID
     resources:   z.array(z.object({

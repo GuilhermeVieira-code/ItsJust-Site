@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { SECTION_SLUG, SUBTOPIC_SLUG, isPublicArticleStatus } from '../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, getArticleSlug, isPublicArticleStatus } from '../content/config';
 
 interface Props {
   currentId?: string;
@@ -122,7 +122,7 @@ const NAV = [
                     {articles.slice(0, 8).map(a => {
                       const sec = SECTION_SLUG[a.data.section as keyof typeof SECTION_SLUG];
                       const sub = SUBTOPIC_SLUG[a.data.subtopic as keyof typeof SUBTOPIC_SLUG];
-                      const href = `/${sec}/${sub}/${a.id}`;
+                      const href = `/${sec}/${sub}/${getArticleSlug(a)}`;
                       const isCurrent = a.id === currentId;
                       return (
                         <li>
@@ -200,7 +200,7 @@ const NAV = [
         <div class="px-3 py-2 rounded-md">
           <p class="font-body text-xs text-text-muted italic">Em seleção — quer ser parceiro?</p>
           <a
-            href="mailto:guivdom@gmail.com?subject=Parceria%20ItsJust%20Tools"
+            href="mailto:contatoitsjust@gmail.com?subject=Parceria%20ItsJust%20Tools"
             class="inline-flex items-center gap-1 text-[11px] font-semibold text-gold/60 hover:text-gold transition-colors no-underline mt-1"
           >
             Entre em contato →
@@ -236,15 +236,15 @@ const NAV = [
 
     <!-- Fale Conosco — CTA de contato -->
     <a
-      href="mailto:guivdom@gmail.com?subject=Contato%20ItsJust"
+      href="/comunidade"
       class="group mx-1 mb-3 flex items-center gap-3 p-3 rounded-xl bg-dark-brown hover:bg-warm-brown border border-dark-brown/80 transition-all duration-200 no-underline"
     >
       <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/15 transition-colors">
         <span class="text-base leading-none">✉️</span>
       </div>
       <div class="flex-1 min-w-0">
-        <p class="font-heading font-bold text-sm text-light-gold leading-tight">Fale Conosco</p>
-        <p class="font-body text-[11px] text-cream/50 leading-tight mt-0.5">Palestras, parcerias ou papo sobre IA</p>
+        <p class="font-heading font-bold text-sm text-light-gold leading-tight">Comunidade ItsJust</p>
+        <p class="font-body text-[11px] text-cream/50 leading-tight mt-0.5">Regras, grupos e ecossistema de comunicação</p>
       </div>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gold/40 group-hover:text-gold/70 flex-shrink-0 group-hover:translate-x-0.5 transition-all">
         <path d="M9 18l6-6-6-6"/>

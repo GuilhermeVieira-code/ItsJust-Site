@@ -1,5 +1,5 @@
 ---
-import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, getArticleSlug } from '../content/config';
 
 interface Article {
   id: string;
@@ -52,7 +52,7 @@ for (const sub of SUBTOPICS_USED) {
 for (const a of articles) {
   const secSlug = SECTION_SLUG[a.data.section as keyof typeof SECTION_SLUG] ?? a.data.section.toLowerCase();
   const subSlug = SUBTOPIC_SLUG[a.data.subtopic as keyof typeof SUBTOPIC_SLUG] ?? a.data.subtopic.toLowerCase();
-  const href = `/${secSlug}/${subSlug}/${a.id}`;
+  const href = `/${secSlug}/${subSlug}/${getArticleSlug(a)}`;
   const shortTitle = a.data.title.length > 28 ? a.data.title.slice(0, 26) + '…' : a.data.title;
   nodes.push({
     id: a.id,

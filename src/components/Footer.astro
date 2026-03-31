@@ -22,6 +22,7 @@ const year = new Date().getFullYear();
           { label: 'Innovation', href: '/innovation' },
           { label: 'People',     href: '/people' },
           { label: 'Life',       href: '/life' },
+          { label: 'Comunidade', href: '/comunidade' },
           { label: 'Sobre',      href: '/sobre' },
         ].map(({ label, href }) => (
           <a href={href} class="font-body text-sm text-text-muted hover:text-gold transition-colors">
@@ -32,9 +33,13 @@ const year = new Date().getFullYear();
 
       <!-- Contato -->
       <div class="text-center md:text-right">
-        <a href="mailto:guivdom@gmail.com" class="font-body text-sm text-text-muted hover:text-gold transition-colors">
-          guivdom@gmail.com
-        </a>
+        <div class="flex flex-wrap items-center justify-center md:justify-end gap-3">
+          <a href="mailto:contatoitsjust@gmail.com?subject=Contato%20ItsJust" class="font-body text-sm text-text-muted hover:text-gold transition-colors">contatoitsjust@gmail.com</a>
+          <a href="https://www.linkedin.com/in/guilherme-domingues-19221019a" target="_blank" rel="noopener noreferrer" class="font-body text-sm text-text-muted hover:text-gold transition-colors">LinkedIn</a>
+          <a href="https://www.youtube.com/@ItsJust-j1q" target="_blank" rel="noopener noreferrer" class="font-body text-sm text-text-muted hover:text-gold transition-colors">YouTube</a>
+          <a href="https://github.com/ItsJust-Code" target="_blank" rel="noopener noreferrer" class="font-body text-sm text-text-muted hover:text-gold transition-colors">GitHub</a>
+          <a href="/comunidade" class="font-body text-sm text-text-muted hover:text-gold transition-colors">Comunidade</a>
+        </div>
       </div>
     </div>
 

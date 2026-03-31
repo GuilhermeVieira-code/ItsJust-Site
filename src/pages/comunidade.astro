@@ -1,0 +1,120 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Comunidade"
+  description="Comunidade ItsJust: um espaço para compartilhar, aprender e evoluir com respeito. Veja as regras, os subgrupos e nosso ecossistema de comunicação."
+>
+  <div class="max-w-content mx-auto px-5 py-14">
+
+    <!-- Header -->
+    <header class="text-center mb-12">
+      <p class="font-body text-xs font-semibold tracking-widest text-gold/70 uppercase mb-2">ItsJust Community</p>
+      <h1 class="font-heading font-bold text-4xl text-dark-brown mb-3">Comunidade ItsJust</h1>
+      <p class="font-body text-warm-gray max-w-2xl mx-auto leading-relaxed">
+        Um lugar para trocar ideias, aprender junto e construir conversas que unem tecnologia, educação, trabalho, sociedade e vida real.
+      </p>
+    </header>
+
+    <!-- Propósito -->
+    <section class="mb-10">
+      <div class="card border-l-gold">
+        <h2 class="font-heading font-bold text-2xl text-warm-brown mb-4">🌻 Nosso propósito</h2>
+        <p class="font-body text-dark-brown leading-relaxed mb-3">
+          A comunidade existe para conectar pessoas que querem crescer com clareza, empatia e consistência.
+          Aqui não importa se você está começando ou já tem experiência: sempre existe espaço para aprender e contribuir.
+        </p>
+        <p class="font-body text-dark-brown leading-relaxed">
+          O foco é compartilhar conhecimento útil, apoiar decisões melhores e fortalecer uma cultura de colaboração.
+        </p>
+      </div>
+    </section>
+
+    <!-- Regras -->
+    <section class="mb-10">
+      <h2 class="font-heading font-bold text-2xl text-warm-brown mb-5">✅ Regras da comunidade</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        {[
+          'Respeito sempre: discorde de ideias sem atacar pessoas.',
+          'Nada de spam, autopromoção excessiva ou mensagens repetidas.',
+          'Compartilhe com contexto: explique por que aquele conteúdo é útil.',
+          'Sem fake news: verifique fontes antes de postar.',
+          'Privacidade em primeiro lugar: não exponha dados de terceiros.',
+          'Mantenha o tema: evite desviar para assuntos sem relação.',
+          'Ajude quem está começando: acolhimento faz parte da cultura.',
+          'Moderação pode remover conteúdo que fira essas regras.',
+        ].map((rule) => (
+          <div class="rounded-xl border border-[#E8DCC8] bg-card-bg px-4 py-3">
+            <p class="font-body text-sm text-dark-brown leading-relaxed">{rule}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Subgrupos -->
+    <section class="mb-12">
+      <h2 class="font-heading font-bold text-2xl text-warm-brown mb-5">📲 Subgrupos no WhatsApp</h2>
+      <p class="font-body text-warm-gray mb-5">
+        Entre pelo grupo geral e, se fizer sentido para você, participe também dos subgrupos temáticos.
+      </p>
+      <div class="grid md:grid-cols-3 gap-4">
+        <article class="rounded-xl border border-[#E8DCC8] bg-off-white p-5">
+          <p class="font-heading font-bold text-lg text-dark-brown mb-2">Comunidade Geral</p>
+          <p class="font-body text-sm text-warm-gray leading-relaxed mb-4">
+            Canal principal com avisos, discussões e novidades do ItsJust.
+          </p>
+          <a href="https://chat.whatsapp.com/ITOStJuXenb0okjlxjuiNI" target="_blank" rel="noopener noreferrer" class="btn-primary text-xs">
+            Entrar no grupo geral
+          </a>
+        </article>
+
+        <article class="rounded-xl border border-[#E8DCC8] bg-off-white p-5">
+          <p class="font-heading font-bold text-lg text-dark-brown mb-2">Subgrupo Alunos</p>
+          <p class="font-body text-sm text-warm-gray leading-relaxed mb-4">
+            Espaço para estudos, dúvidas, carreira e apoio entre estudantes.
+          </p>
+          <a href="https://chat.whatsapp.com/LGXJFtC48bd273R25xtEWt" target="_blank" rel="noopener noreferrer" class="btn-primary text-xs">
+            Entrar no subgrupo
+          </a>
+        </article>
+
+        <article class="rounded-xl border border-[#E8DCC8] bg-off-white p-5">
+          <p class="font-heading font-bold text-lg text-dark-brown mb-2">Subgrupo Professores</p>
+          <p class="font-body text-sm text-warm-gray leading-relaxed mb-4">
+            Trocas sobre educação, prática docente e uso responsável de tecnologia em sala.
+          </p>
+          <a href="https://chat.whatsapp.com/CsHgveCIj1235a38zlg7XO" target="_blank" rel="noopener noreferrer" class="btn-primary text-xs">
+            Entrar no subgrupo
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <!-- Ecossistema -->
+    <section class="mb-8">
+      <h2 class="font-heading font-bold text-2xl text-warm-brown mb-5">🌐 Ecossistema de comunicação</h2>
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {[
+          { label: 'Site ItsJust', href: '/', desc: 'Artigos, reflexões e conteúdos principais.' },
+          { label: 'YouTube', href: 'https://www.youtube.com/@ItsJust-j1q', desc: 'Vídeos e conteúdos audiovisuais do projeto.' },
+          { label: 'LinkedIn', href: 'https://www.linkedin.com/in/guilherme-domingues-19221019a', desc: 'Atualizações e conexão profissional.' },
+          { label: 'GitHub (ItsJust-Code)', href: 'https://github.com/ItsJust-Code', desc: 'Ferramentas open-source e projetos.' },
+          { label: 'WhatsApp Comunidade', href: 'https://chat.whatsapp.com/ITOStJuXenb0okjlxjuiNI', desc: 'Canal principal para trocas diárias.' },
+          { label: 'Contato da marca', href: 'mailto:contatoitsjust@gmail.com?subject=Contato%20ItsJust', desc: 'Fale com o time pelo e-mail oficial.' },
+        ].map((item) => (
+          <a
+            href={item.href}
+            target={item.href.startsWith('/') ? undefined : '_blank'}
+            rel={item.href.startsWith('/') ? undefined : 'noopener noreferrer'}
+            class="rounded-xl border border-[#E8DCC8] bg-card-bg p-5 no-underline hover:border-gold/40 hover:bg-off-white transition-all duration-200"
+          >
+            <p class="font-heading font-bold text-base text-dark-brown mb-1">{item.label}</p>
+            <p class="font-body text-sm text-warm-gray leading-relaxed">{item.desc}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+
+  </div>
+</Base>

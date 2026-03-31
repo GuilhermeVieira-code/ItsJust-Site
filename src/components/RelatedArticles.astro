@@ -1,6 +1,6 @@
 ---
 import ArticleCard from './ArticleCard.astro';
-import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+import { getArticleSlug } from '../content/config';
 
 interface Article {
   id: string;
@@ -52,7 +52,7 @@ const related = all
           date={article.data.date}
           section={article.data.section}
           subtopic={article.data.subtopic}
-          slug={article.id}
+          slug={getArticleSlug(article)}
           tags={article.data.tags}
         />
       ))}
