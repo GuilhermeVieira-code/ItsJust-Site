@@ -2,10 +2,10 @@
 import { getCollection } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import ArticleFilter from '../../../components/ArticleFilter.astro';
-import { SECTION_SLUG, SUBTOPIC_SLUG } from '../../../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, isPublicArticleStatus } from '../../../content/config';
 
 export async function getStaticPaths() {
-  const articles = await getCollection('articles', ({ data }) => data.status === 'published');
+  const articles = await getCollection('articles', ({ data }) => isPublicArticleStatus(data.status));
   const paths: { params: { section: string; subtopic: string }; props: { subtopicLabel: string; sectionLabel: string } }[] = [];
   const seen = new Set<string>();
 
@@ -28,7 +28,7 @@ const { section, subtopic } = Astro.params;
 const { subtopicLabel, sectionLabel } = Astro.props;
 
 const all = await getCollection('articles', ({ data }) =>
-  data.status === 'published' &&
+  isPublicArticleStatus(data.status) &&
   SECTION_SLUG[data.section as keyof typeof SECTION_SLUG] === section &&
   SUBTOPIC_SLUG[data.subtopic as keyof typeof SUBTOPIC_SLUG] === subtopic
 );

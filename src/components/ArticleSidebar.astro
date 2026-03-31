@@ -1,13 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
-import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, isPublicArticleStatus } from '../content/config';
 
 interface Props {
   currentId?: string;
 }
 const { currentId } = Astro.props;
 
-const allArticles = await getCollection('articles', ({ data }) => data.status === 'published');
+const allArticles = await getCollection('articles', ({ data }) => isPublicArticleStatus(data.status));
 allArticles.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const bySubtopic: Record<string, typeof allArticles> = {};

@@ -5,6 +5,12 @@ const SUBTOPICS   = ['ItsJustAI', 'ItsJustDev', 'ItsJustData', 'ItsJustFuture',
                      'ItsJustStartups', 'ItsJustScience', 'ItsJustLeaders',
                      'ItsJustTeams', 'ItsJustWork', 'ItsJustSociety'] as const;
 const STATUS_VALUES = ['draft', 'review', 'approved', 'published'] as const;
+export type ArticleStatus = typeof STATUS_VALUES[number];
+
+export const PUBLIC_ARTICLE_STATUSES = new Set<ArticleStatus>(['approved', 'published']);
+export function isPublicArticleStatus(status: ArticleStatus): boolean {
+  return PUBLIC_ARTICLE_STATUSES.has(status);
+}
 
 export const SECTION_SLUG: Record<typeof SECTIONS[number], string> = {
   ItsJustTech:       'tech',

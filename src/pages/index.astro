@@ -4,8 +4,9 @@ import ArticleFilter from '../components/ArticleFilter.astro';
 import ToolsCarousel from '../components/ToolsCarousel.astro';
 import KnowledgeGraph from '../components/KnowledgeGraph.astro';
 import { getCollection } from 'astro:content';
+import { isPublicArticleStatus } from '../content/config';
 
-const allArticles = await getCollection('articles', ({ data }) => data.status === 'published');
+const allArticles = await getCollection('articles', ({ data }) => isPublicArticleStatus(data.status));
 const sorted = allArticles.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
