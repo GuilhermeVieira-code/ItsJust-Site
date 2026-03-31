@@ -63,18 +63,38 @@ import Base from '../layouts/Base.astro';
     <div class="divider"></div>
 
     <!-- Contato -->
-    <section class="text-center">
-      <h2 class="font-heading font-bold text-2xl text-warm-brown mb-4">💬 Vamos conversar?</h2>
-      <p class="font-body text-warm-gray mb-6">
-        Se quiser trocar uma ideia, tirar alguma dúvida ou conversar sobre palestras e projetos, fique à vontade.
+    <section>
+      <h2 class="font-heading font-bold text-2xl text-warm-brown mb-4 text-center">💬 Vamos conversar?</h2>
+      <p class="font-body text-warm-gray text-center mb-6">
+        Se quiser falar sobre parcerias, palestras, comunidade ou projetos, estes são os melhores canais.
       </p>
-      <a href="/comunidade" class="btn-primary">
-        Ver página da Comunidade
-      </a>
-      <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
-        <a href="mailto:contatoitsjust@gmail.com?subject=Contato%20ItsJust" class="btn-ghost text-xs">contatoitsjust@gmail.com</a>
+
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <article class="rounded-xl border border-[#E8DCC8] bg-off-white p-5">
+          <p class="font-heading font-bold text-base text-dark-brown mb-2">Contato público da marca</p>
+          <p class="font-body text-sm text-warm-gray mb-3">Para parcerias, eventos, palestras e colaborações com o ItsJust.</p>
+          <a href="mailto:contatoitsjust@gmail.com?subject=Parceria%20ItsJust" class="btn-primary text-xs">
+            contatoitsjust@gmail.com
+          </a>
+        </article>
+
+        <article class="rounded-xl border border-[#E8DCC8] bg-off-white p-5">
+          <p class="font-heading font-bold text-base text-dark-brown mb-2">Contato pessoal / projetos internos</p>
+          <p class="font-body text-sm text-warm-gray mb-3">Canal direto para conversas mais próximas e alinhamentos internos.</p>
+          <a href="mailto:guivdom@gmail.com?subject=Contato%20direto%20ItsJust" class="btn-primary text-xs">
+            guivdom@gmail.com
+          </a>
+        </article>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <a href="/comunidade" class="btn-ghost text-xs">Página da Comunidade</a>
+        <a href="https://chat.whatsapp.com/ITOStJuXenb0okjlxjuiNI" target="_blank" rel="noopener noreferrer" class="btn-ghost text-xs">WhatsApp Geral</a>
         <a href="https://chat.whatsapp.com/LGXJFtC48bd273R25xtEWt" target="_blank" rel="noopener noreferrer" class="btn-ghost text-xs">Subgrupo Alunos</a>
         <a href="https://chat.whatsapp.com/CsHgveCIj1235a38zlg7XO" target="_blank" rel="noopener noreferrer" class="btn-ghost text-xs">Subgrupo Professores</a>
+        <a href="https://www.linkedin.com/in/guilherme-domingues-19221019a" target="_blank" rel="noopener noreferrer" class="btn-ghost text-xs">LinkedIn</a>
+        <a href="https://www.youtube.com/@ItsJust-j1q" target="_blank" rel="noopener noreferrer" class="btn-ghost text-xs">YouTube</a>
+        <a href="https://github.com/ItsJust-Code" target="_blank" rel="noopener noreferrer" class="btn-ghost text-xs">GitHub</a>
       </div>
     </section>
 

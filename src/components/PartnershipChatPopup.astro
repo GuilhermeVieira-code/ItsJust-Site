@@ -1,0 +1,101 @@
+<div id="partnership-chat-root" class="fixed bottom-5 right-5 z-[70] max-w-[calc(100vw-2rem)]">
+  <div
+    id="partnership-chat-card"
+    class="hidden mb-3 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-[#E8DCC8] bg-off-white p-4 shadow-[0_18px_45px_rgba(44,24,16,0.22)] transition-all duration-200 opacity-0 translate-y-2 scale-95"
+    aria-live="polite"
+  >
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <div>
+        <p class="font-heading font-bold text-base text-dark-brown">Parcerias ItsJust</p>
+        <p class="font-body text-xs text-warm-gray mt-1">Quer cocriar conteúdo, palestra ou projeto?</p>
+      </div>
+      <button
+        id="partnership-chat-close"
+        type="button"
+        class="w-7 h-7 inline-flex items-center justify-center rounded-lg border border-[#E8DCC8] text-warm-gray hover:text-dark-brown hover:border-gold/40 transition-colors"
+        aria-label="Fechar contato"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="grid gap-2">
+      <a
+        href="mailto:contatoitsjust@gmail.com?subject=Parceria%20ItsJust"
+        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gold text-dark-brown font-body font-semibold text-sm rounded-xl hover:bg-amber transition-all no-underline"
+      >
+        Enviar e-mail de parceria
+      </a>
+      <a
+        href="https://www.linkedin.com/in/guilherme-domingues-19221019a"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-[#E8DCC8] text-dark-brown font-body font-medium text-sm rounded-xl hover:border-gold/40 hover:bg-white transition-all no-underline"
+      >
+        Chamar no LinkedIn
+      </a>
+    </div>
+
+    <p class="font-body text-[11px] text-warm-gray mt-3">
+      Contato direto: <a href="mailto:contatoitsjust@gmail.com" class="text-gold hover:text-amber no-underline">contatoitsjust@gmail.com</a>
+    </p>
+  </div>
+
+  <button
+    id="partnership-chat-trigger"
+    type="button"
+    aria-expanded="false"
+    aria-controls="partnership-chat-card"
+    class="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-dark-brown text-cream border border-[#5D3B2A] shadow-[0_12px_28px_rgba(44,24,16,0.35)] hover:bg-warm-brown transition-all duration-200"
+  >
+    <span class="inline-flex w-8 h-8 rounded-full bg-gold text-dark-brown items-center justify-center text-sm">💬</span>
+    <span class="font-body text-sm font-semibold">Parcerias</span>
+  </button>
+</div>
+
+<script>
+  const root = document.getElementById('partnership-chat-root');
+
+  if (root && !root.dataset.initialized) {
+    root.dataset.initialized = 'true';
+
+    const trigger = document.getElementById('partnership-chat-trigger');
+    const panel = document.getElementById('partnership-chat-card');
+    const closeBtn = document.getElementById('partnership-chat-close');
+
+    if (trigger && panel && closeBtn) {
+      let open = false;
+
+      const show = () => {
+        panel.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          panel.classList.remove('opacity-0', 'translate-y-2', 'scale-95');
+        });
+        trigger.setAttribute('aria-expanded', 'true');
+        open = true;
+      };
+
+      const hide = () => {
+        panel.classList.add('opacity-0', 'translate-y-2', 'scale-95');
+        trigger.setAttribute('aria-expanded', 'false');
+        open = false;
+        window.setTimeout(() => {
+          if (!open) panel.classList.add('hidden');
+        }, 180);
+      };
+
+      trigger.addEventListener('click', () => {
+        if (open) hide();
+        else show();
+      });
+
+      closeBtn.addEventListener('click', hide);
+
+      const seenKey = 'itsjust-partnership-chat-seen';
+      if (!sessionStorage.getItem(seenKey)) {
+        window.setTimeout(show, 1200);
+        sessionStorage.setItem(seenKey, '1');
+      }
+    }
+  }
+</script>

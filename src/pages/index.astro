@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import ArticleFilter from '../components/ArticleFilter.astro';
 import ToolsCarousel from '../components/ToolsCarousel.astro';
 import KnowledgeGraph from '../components/KnowledgeGraph.astro';
+import PartnershipChatPopup from '../components/PartnershipChatPopup.astro';
 import { getCollection } from 'astro:content';
 import { isPublicArticleStatus } from '../content/config';
 
@@ -184,5 +185,7 @@ const sorted = allArticles.sort((a, b) => b.data.date.valueOf() - a.data.date.va
       </div>
     </section>
   )}
+
+  <PartnershipChatPopup />
 
 </Base>
