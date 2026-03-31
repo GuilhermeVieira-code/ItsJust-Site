@@ -170,14 +170,14 @@ const NAV = [
         <!-- Ferramentas próprias (GitHub) -->
         <p class="px-3 pt-1 pb-0.5 font-body text-[10px] font-semibold text-text-muted uppercase tracking-wider">Open Source</p>
         {[
-          { name: 'ItsJustNotes',              status: 'live', url: 'https://github.com/ItsJust-Code/ItsJustNotes' },
+          { name: 'ItsJustNotes',              status: 'live', url: '/ferramentas/itsjust-notes' },
           { name: 'Local ML Translator',        status: 'soon', url: '#' },
           { name: 'Breast Cancer Classifier',   status: 'soon', url: '#' },
         ].map(({ name, status, url }) => (
           <a
             href={status === 'live' ? url : undefined}
-            target={status === 'live' ? '_blank' : undefined}
-            rel={status === 'live' ? 'noopener noreferrer' : undefined}
+            target={status === 'live' && url.startsWith('http') ? '_blank' : undefined}
+            rel={status === 'live' && url.startsWith('http') ? 'noopener noreferrer' : undefined}
             class:list={[
               'flex items-center justify-between px-3 py-2 rounded-md font-body text-sm transition-colors group no-underline',
               status === 'live'
@@ -190,7 +190,7 @@ const NAV = [
               {name}
             </span>
             <span class="text-[10px] opacity-0 group-hover:opacity-60 transition-opacity text-gold">
-              {status === 'live' ? 'GitHub ↗' : 'em breve'}
+              {status === 'live' ? (url.startsWith('http') ? 'GitHub ↗' : 'Abrir →') : 'em breve'}
             </span>
           </a>
         ))}
