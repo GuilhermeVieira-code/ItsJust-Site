@@ -24,6 +24,8 @@ interface DeepDiveItem {
   type?: 'youtube' | 'podcast' | 'newsletter' | 'course' | 'article';
   description?: string;
   author?: string;
+  language?: 'pt-BR' | 'en' | 'es' | 'other';
+  priority?: number;
 }
 
 interface Props {

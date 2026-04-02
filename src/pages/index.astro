@@ -108,7 +108,7 @@ const sorted = allArticles.sort((a, b) => b.data.date.valueOf() - a.data.date.va
           <div class="flex-1 min-w-0">
             <h2 class="font-heading font-bold text-2xl text-dark-brown mb-8 reveal">Artigos</h2>
             <div class="reveal reveal-delay-1">
-              <ArticleFilter articles={sorted} showSectionFilter={false} />
+              <ArticleFilter articles={sorted} showSectionFilter={false} cardLayout="horizontal" />
             </div>
           </div>
 

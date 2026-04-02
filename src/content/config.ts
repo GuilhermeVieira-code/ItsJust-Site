@@ -97,6 +97,8 @@ const articles = defineCollection({
       type:        z.enum(['youtube', 'podcast', 'newsletter', 'course', 'article']).optional(),
       description: z.string().optional(),
       author:      z.string().optional(),
+      language:    z.enum(['pt-BR', 'en', 'es', 'other']).optional(),
+      priority:    z.number().int().min(1).max(5).optional(),
     })).default([]),
   }),
 });

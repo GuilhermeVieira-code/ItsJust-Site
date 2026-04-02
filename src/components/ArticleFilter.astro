@@ -19,9 +19,10 @@ interface Article {
 interface Props {
   articles: Article[];
   showSectionFilter?: boolean;
+  cardLayout?: 'vertical' | 'horizontal';
 }
 
-const { articles, showSectionFilter = false } = Astro.props;
+const { articles, showSectionFilter = false, cardLayout = 'vertical' } = Astro.props;
 
 // Coleta subtópicos únicos presentes nos artigos
 const subtopics = [...new Set(articles.map(a => a.data.subtopic))];
@@ -78,7 +79,10 @@ const sections  = [...new Set(articles.map(a => a.data.section))];
   </div>
 
   <!-- Grid de artigos -->
-  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class:list={[
+    'grid gap-6',
+    cardLayout === 'horizontal' ? 'xl:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3',
+  ]}>
     {articles.map(article => (
       <div
         class="article-item"
@@ -98,6 +102,7 @@ const sections  = [...new Set(articles.map(a => a.data.section))];
           tags={article.data.tags}
           cover={article.data.cover}
           video={article.data.video}
+          layout={cardLayout}
         />
       </div>
     ))}

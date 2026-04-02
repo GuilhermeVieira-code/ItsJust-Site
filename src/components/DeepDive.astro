@@ -5,6 +5,14 @@ interface Resource {
   type?: 'youtube' | 'podcast' | 'newsletter' | 'course' | 'article';
   description?: string;
   author?: string;
+  language?: 'pt-BR' | 'en' | 'es' | 'other';
+  priority?: number;
+}
+
+interface NormalizedResource extends Resource {
+  type: 'youtube' | 'podcast' | 'newsletter' | 'course' | 'article';
+  language: 'pt-BR' | 'en' | 'es' | 'other';
+  priority: number;
 }
 
 interface Props {
@@ -13,150 +21,163 @@ interface Props {
 
 const { extra = [] } = Astro.props;
 
-// ─── Curated defaults — atualize conforme desejar ────────────────────────────
-const defaults: Resource[] = [
-  {
-    type: 'youtube',
-    title: 'Lex Fridman Podcast',
-    url: 'https://youtube.com/@lexfridman',
-    description: 'Conversas profundas com os maiores nomes da IA, ciência e tecnologia.',
-    author: 'Lex Fridman',
-  },
-  {
-    type: 'youtube',
-    title: 'Two Minute Papers',
-    url: 'https://youtube.com/@TwoMinutePapers',
-    description: 'Os papers mais importantes de IA resumidos de forma acessível.',
-    author: 'Károly Zsolnai-Fehér',
-  },
-  {
-    type: 'youtube',
-    title: 'Andrej Karpathy',
-    url: 'https://youtube.com/@AndrejKarpathy',
-    description: 'Aulas profundas sobre redes neurais e LLMs pelo ex-diretor de IA da Tesla.',
-    author: 'Andrej Karpathy',
-  },
-  {
-    type: 'podcast',
-    title: 'The TWIML AI Podcast',
-    url: 'https://twimlai.com/podcast/',
-    description: 'Machine Learning e IA para profissionais — entrevistas com pesquisadores e practitioners.',
-    author: 'Sam Charrington',
-  },
-  {
-    type: 'podcast',
-    title: 'Inteligência Artificial — Hipsters',
-    url: 'https://www.hipsters.tech/',
-    description: 'O maior podcast de tecnologia do Brasil, com episódios dedicados à IA.',
-    author: 'Alura',
-  },
-  {
-    type: 'newsletter',
-    title: 'The Batch — DeepLearning.AI',
-    url: 'https://www.deeplearning.ai/the-batch/',
-    description: 'Newsletter semanal com as principais notícias de IA, por Andrew Ng.',
-    author: 'Andrew Ng',
-  },
-  {
-    type: 'newsletter',
-    title: 'MIT Technology Review',
-    url: 'https://www.technologyreview.com/',
-    description: 'Jornalismo tecnológico de excelência — sem hype, com profundidade.',
-    author: 'MIT',
-  },
-];
-
-const all = [...defaults, ...extra];
-
-const TYPE_CONFIG: Record<string, { label: string; icon: string; bg: string; text: string; border: string }> = {
-  youtube:    { label: 'YouTube',      icon: '▶', bg: 'bg-red-50',     text: 'text-red-600',     border: 'border-red-200' },
-  podcast:    { label: 'Podcast',      icon: '🎙', bg: 'bg-purple-50',  text: 'text-purple-600',  border: 'border-purple-200' },
-  newsletter: { label: 'Newsletter',   icon: '📰', bg: 'bg-sky-50',     text: 'text-sky-600',     border: 'border-sky-200' },
-  course:     { label: 'Curso',        icon: '📚', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
-  article:    { label: 'Artigo',       icon: '📝', bg: 'bg-amber-50',   text: 'text-amber-600',   border: 'border-amber-200' },
+const TYPE_CONFIG: Record<NormalizedResource['type'], { label: string; icon: string; bg: string; text: string; border: string }> = {
+  youtube:    { label: 'YouTube',    icon: '▶', bg: 'bg-red-50',     text: 'text-red-600',     border: 'border-red-200' },
+  podcast:    { label: 'Podcast',    icon: '🎙', bg: 'bg-blue-50',    text: 'text-blue-600',    border: 'border-blue-200' },
+  newsletter: { label: 'Newsletter', icon: '📰', bg: 'bg-sky-50',     text: 'text-sky-600',     border: 'border-sky-200' },
+  course:     { label: 'Curso',      icon: '📚', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
+  article:    { label: 'Artigo',     icon: '📝', bg: 'bg-amber-50',   text: 'text-amber-600',   border: 'border-amber-200' },
 };
 
-const groups = ['youtube', 'podcast', 'newsletter', 'course', 'article'] as const;
-const grouped = groups.map(type => ({
-  type,
-  config: TYPE_CONFIG[type],
-  items: all.filter(r => (r.type ?? 'article') === type),
-})).filter(g => g.items.length > 0);
+const PT_HINTS = ['pt-br', 'portugues', 'português', 'brasil', 'brasileiro', 'brasileira'];
+const TYPE_ORDER: Record<NormalizedResource['type'], number> = {
+  article: 1,
+  course: 2,
+  podcast: 3,
+  youtube: 4,
+  newsletter: 5,
+};
+
+function inferLanguage(resource: Resource): NormalizedResource['language'] {
+  if (resource.language) return resource.language;
+
+  const text = `${resource.title} ${resource.description ?? ''} ${resource.author ?? ''}`.toLowerCase();
+  if (PT_HINTS.some((hint) => text.includes(hint))) return 'pt-BR';
+  if (/[áàâãéêíóôõúç]/i.test(text)) return 'pt-BR';
+
+  try {
+    const host = new URL(resource.url).hostname.toLowerCase();
+    if (host.endsWith('.br')) return 'pt-BR';
+  } catch {
+    // no-op
+  }
+
+  return 'other';
+}
+
+const normalized: NormalizedResource[] = extra.map((resource) => ({
+  ...resource,
+  type: resource.type ?? 'article',
+  language: inferLanguage(resource),
+  priority: resource.priority ?? 3,
+}));
+
+const sorted = normalized.sort((a, b) => {
+  const languageScore = (a.language === 'pt-BR' ? 2 : 0) - (b.language === 'pt-BR' ? 2 : 0);
+  if (languageScore !== 0) return -languageScore;
+  if (a.priority !== b.priority) return b.priority - a.priority;
+  if (a.type !== b.type) return TYPE_ORDER[a.type] - TYPE_ORDER[b.type];
+  return a.title.localeCompare(b.title, 'pt-BR');
+});
+
+const featured = sorted.slice(0, 4);
+const remaining = sorted.slice(4);
+const ptCount = sorted.filter((r) => r.language === 'pt-BR').length;
+
+const languageTag = (language: NormalizedResource['language']) => {
+  if (language === 'pt-BR') return { label: 'PT-BR', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+  if (language === 'en') return { label: 'EN', className: 'bg-slate-50 text-slate-600 border-slate-200' };
+  if (language === 'es') return { label: 'ES', className: 'bg-slate-50 text-slate-600 border-slate-200' };
+  return { label: 'Outro', className: 'bg-slate-50 text-slate-600 border-slate-200' };
+};
 ---
 
-{grouped.length > 0 && (
+{sorted.length > 0 && (
   <section class="mt-14 border-t border-[#E8DCC8] pt-10">
-
-    <!-- Cabeçalho -->
-    <div class="flex items-center gap-3 mb-6">
+    <div class="flex items-center gap-3 mb-3">
       <span class="text-2xl select-none" aria-hidden="true">🌻</span>
       <div>
         <h2 class="font-heading font-bold text-xl text-dark-brown leading-tight">
-          Se aprofunde em outros conteúdos
+          Se aprofunde em outros conteudos
         </h2>
         <p class="font-body text-sm text-warm-gray mt-0.5">
-          Canais, podcasts e leituras que valem cada minuto do seu tempo.
+          Priorizamos referencias em portugues para facilitar sua jornada.
         </p>
       </div>
     </div>
 
-    <!-- Grupos por categoria -->
-    <div class="space-y-8">
-      {grouped.map(({ type, config, items }) => (
-        <div>
-          <!-- Label da categoria -->
-          <div class="flex items-center gap-2 mb-3">
-            <span class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold font-body border ${config.bg} ${config.text} ${config.border}`}>
-              <span aria-hidden="true">{config.icon}</span>
-              {config.label}
-            </span>
-            <div class="flex-1 h-px bg-[#E8DCC8]"></div>
-          </div>
-
-          <!-- Cards -->
-          <div class="grid sm:grid-cols-2 gap-3">
-            {items.map(r => (
-              <a
-                href={r.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="group flex gap-3 p-4 rounded-xl border border-[#E8DCC8] bg-card-bg hover:border-gold/40 hover:bg-[#FFFBF0] transition-all duration-200 no-underline"
-              >
-                <!-- Ícone circular -->
-                <div class={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm ${config.bg} ${config.text} border ${config.border}`}>
-                  {config.icon}
-                </div>
-
-                <!-- Texto -->
-                <div class="min-w-0 flex-1">
-                  <p class="font-heading font-bold text-sm text-dark-brown group-hover:text-gold transition-colors duration-150 leading-snug truncate">
-                    {r.title}
-                  </p>
-                  {r.author && (
-                    <p class="font-body text-[10px] text-warm-gray mt-0.5">{r.author}</p>
-                  )}
-                  {r.description && (
-                    <p class="font-body text-xs text-warm-gray mt-1.5 leading-snug line-clamp-2">
-                      {r.description}
-                    </p>
-                  )}
-                </div>
-
-                <!-- Seta -->
-                <span class="text-warm-gray/40 group-hover:text-gold group-hover:translate-x-0.5 transition-all duration-150 flex-shrink-0 self-center text-xs">
-                  ↗
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-
-    <!-- Nota de rodapé -->
-    <p class="font-body text-[11px] text-warm-gray/60 mt-6 text-center italic">
-      Curadoria ItsJust — conteúdos selecionados por Guilherme Domingues.
+    <p class="font-body text-xs text-warm-gray mb-5">
+      {ptCount} de {sorted.length} referencia{sorted.length !== 1 ? 's' : ''} em PT-BR.
     </p>
 
+    <div class="grid sm:grid-cols-2 gap-3">
+      {featured.map((resource) => {
+        const config = TYPE_CONFIG[resource.type];
+        const language = languageTag(resource.language);
+        return (
+          <a
+            href={resource.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group flex gap-3 p-4 rounded-xl border border-[#E8DCC8] bg-card-bg hover:border-gold/40 hover:bg-[#FFFBF0] transition-all duration-200 no-underline"
+          >
+            <div class={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm ${config.bg} ${config.text} border ${config.border}`}>
+              {config.icon}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <p class="font-heading font-bold text-sm text-dark-brown group-hover:text-gold transition-colors duration-150 leading-snug">
+                  {resource.title}
+                </p>
+                <span class={`inline-flex px-2 py-0.5 rounded border text-[10px] font-semibold font-body flex-shrink-0 ${language.className}`}>
+                  {language.label}
+                </span>
+              </div>
+              <p class="font-body text-[10px] text-warm-gray mt-0.5">
+                {resource.author ?? config.label}
+              </p>
+              {resource.description && (
+                <p class="font-body text-xs text-warm-gray mt-1.5 leading-snug line-clamp-2">
+                  {resource.description}
+                </p>
+              )}
+            </div>
+          </a>
+        );
+      })}
+    </div>
+
+    {remaining.length > 0 && (
+      <details class="mt-4 rounded-xl border border-[#E8DCC8] bg-[#FFFBF0]">
+        <summary class="cursor-pointer list-none px-4 py-3 font-body text-sm font-semibold text-dark-brown flex items-center justify-between">
+          <span>Ver mais referencias ({remaining.length})</span>
+          <span class="text-gold">↓</span>
+        </summary>
+
+        <div class="px-3 pb-3">
+          <div class="max-h-[22rem] overflow-y-auto overscroll-contain pr-1 grid sm:grid-cols-2 gap-3">
+            {remaining.map((resource) => {
+              const config = TYPE_CONFIG[resource.type];
+              const language = languageTag(resource.language);
+              return (
+                <a
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="group flex gap-3 p-3 rounded-lg border border-[#E8DCC8] bg-card-bg hover:border-gold/40 hover:bg-white transition-all duration-200 no-underline"
+                >
+                  <div class={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs ${config.bg} ${config.text} border ${config.border}`}>
+                    {config.icon}
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-start justify-between gap-2">
+                      <p class="font-heading font-bold text-xs text-dark-brown group-hover:text-gold transition-colors duration-150 leading-snug">
+                        {resource.title}
+                      </p>
+                      <span class={`inline-flex px-1.5 py-0.5 rounded border text-[9px] font-semibold font-body flex-shrink-0 ${language.className}`}>
+                        {language.label}
+                      </span>
+                    </div>
+                    <p class="font-body text-[10px] text-warm-gray mt-0.5">
+                      {resource.author ?? config.label}
+                    </p>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </details>
+    )}
   </section>
 )}
