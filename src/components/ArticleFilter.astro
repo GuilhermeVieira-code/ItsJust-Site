@@ -28,7 +28,7 @@ const subtopics = [...new Set(articles.map(a => a.data.subtopic))];
 const sections  = [...new Set(articles.map(a => a.data.section))];
 ---
 
-<div id="filter-root">
+<div data-article-filter>
 
   <!-- Barra de busca + filtros -->
   <div class="flex flex-col gap-4 mb-8">
@@ -39,7 +39,7 @@ const sections  = [...new Set(articles.map(a => a.data.section))];
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
       </svg>
       <input
-        id="search-input"
+        data-article-search
         type="search"
         placeholder="Buscar artigos..."
         class="w-full pl-9 pr-4 py-2.5 bg-card-bg border border-[#E8DCC8] rounded font-body text-sm text-dark-brown placeholder-warm-gray focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
@@ -78,7 +78,7 @@ const sections  = [...new Set(articles.map(a => a.data.section))];
   </div>
 
   <!-- Grid de artigos -->
-  <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
     {articles.map(article => (
       <div
         class="article-item"
@@ -104,7 +104,7 @@ const sections  = [...new Set(articles.map(a => a.data.section))];
   </div>
 
   <!-- Estado vazio -->
-  <p id="empty-state" class="hidden font-body text-warm-gray text-center py-12">
+  <p data-article-empty-state class="hidden font-body text-warm-gray text-center py-12">
     Nenhum artigo encontrado para essa busca. 🌻
   </p>
 </div>
@@ -126,61 +126,91 @@ const sections  = [...new Set(articles.map(a => a.data.section))];
   }
 </style>
 
-<script>
-  const searchInput  = document.getElementById('search-input') as HTMLInputElement;
-  const buttons      = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
-  const items        = document.querySelectorAll<HTMLElement>('.article-item');
-  const emptyState   = document.getElementById('empty-state')!;
+<script is:inline>
+  (() => {
+    const initializedRoots = new WeakSet();
 
-  let activeFilter = 'all';
-  let searchQuery  = '';
+    function initRoot(root) {
+      if (!root || initializedRoots.has(root)) return;
 
-  function applyFilters() {
-    let visible = 0;
+      const searchInput = root.querySelector('[data-article-search]');
+      const buttons = Array.from(root.querySelectorAll('.filter-btn'));
+      const items = Array.from(root.querySelectorAll('.article-item'));
+      const emptyState = root.querySelector('[data-article-empty-state]');
 
-    items.forEach(item => {
-      const title       = item.dataset.title ?? '';
-      const description = item.dataset.description ?? '';
-      const tags        = item.dataset.tags ?? '';
-      const subtopic    = item.dataset.subtopic ?? '';
-      const section     = item.dataset.section ?? '';
+      if (!emptyState || !buttons.length || !items.length) return;
 
-      // Verifica filtro de tema
-      let matchesFilter = activeFilter === 'all';
-      if (activeFilter.startsWith('subtopic:')) {
-        matchesFilter = subtopic === activeFilter.replace('subtopic:', '');
-      } else if (activeFilter.startsWith('section:')) {
-        matchesFilter = section === activeFilter.replace('section:', '');
+      initializedRoots.add(root);
+
+      let activeFilter = (buttons.find((b) => b.classList.contains('active'))?.dataset.filter) || 'all';
+      let searchQuery = '';
+
+      const applyFilters = () => {
+        let visible = 0;
+        const q = searchQuery.toLowerCase().trim();
+
+        items.forEach((item) => {
+          const title = item.dataset.title || '';
+          const description = item.dataset.description || '';
+          const tags = item.dataset.tags || '';
+          const subtopic = item.dataset.subtopic || '';
+          const section = item.dataset.section || '';
+
+          let matchesFilter = activeFilter === 'all';
+          if (activeFilter.startsWith('subtopic:')) {
+            matchesFilter = subtopic === activeFilter.replace('subtopic:', '');
+          } else if (activeFilter.startsWith('section:')) {
+            matchesFilter = section === activeFilter.replace('section:', '');
+          }
+
+          const matchesSearch = !q || title.includes(q) || description.includes(q) || tags.includes(q);
+
+          if (matchesFilter && matchesSearch) {
+            item.style.display = '';
+            visible += 1;
+          } else {
+            item.style.display = 'none';
+          }
+        });
+
+        emptyState.classList.toggle('hidden', visible > 0);
+      };
+
+      root.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const btn = target.closest('.filter-btn');
+        if (!(btn instanceof HTMLButtonElement) || !root.contains(btn)) return;
+
+        activeFilter = btn.dataset.filter || 'all';
+        buttons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+      });
+
+      if (searchInput instanceof HTMLInputElement) {
+        searchInput.addEventListener('input', () => {
+          searchQuery = searchInput.value;
+          applyFilters();
+        });
       }
 
-      // Verifica busca por texto
-      const q = searchQuery.toLowerCase().trim();
-      const matchesSearch = !q || title.includes(q) || description.includes(q) || tags.includes(q);
-
-      if (matchesFilter && matchesSearch) {
-        item.style.display = '';
-        visible++;
-      } else {
-        item.style.display = 'none';
-      }
-    });
-
-    emptyState.classList.toggle('hidden', visible > 0);
-  }
-
-  // Filtros por tema
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      activeFilter = btn.dataset.filter ?? 'all';
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       applyFilters();
-    });
-  });
+    }
 
-  // Busca por texto
-  searchInput?.addEventListener('input', () => {
-    searchQuery = searchInput.value;
-    applyFilters();
-  });
+    const initAll = () => {
+      document.querySelectorAll('[data-article-filter]').forEach((root) => {
+        if (root instanceof HTMLElement) initRoot(root);
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAll, { once: true });
+    } else {
+      initAll();
+    }
+
+    document.addEventListener('astro:page-load', initAll);
+  })();
 </script>
