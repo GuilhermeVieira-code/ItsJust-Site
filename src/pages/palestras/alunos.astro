@@ -5,10 +5,11 @@ import { SECTION_SLUG, SUBTOPIC_SLUG, getArticleSlug, isPublicArticleStatus } fr
 
 const prioritySlugs = [
   'usos-de-ia-para-estudantes',
+  'o-futuro-do-trabalho-conhecimento-e-seu-superpoder',
+  'tecnologia-pessoas-e-planeta-os-tres-mercados-do-futuro',
+  'ikigai-na-era-da-ia',
   'como-criar-habitos-que-ficam-e-quebrar-os-que-atrapalham',
   'o-problema-do-imediatismo-digital',
-  'como-falar-sobre-ia-quando-parece-demais',
-  'a-tecnologia-amplifica-quem-voce-e',
 ] as const;
 
 const allArticles = await getCollection('articles', ({ data }) => isPublicArticleStatus(data.status));
@@ -26,118 +27,134 @@ function getArticleHref(article: (typeof allArticles)[number]): string {
 
 <Base
   title="Pos-palestra para Alunos"
-  description="Pagina de apoio para alunos apos palestra do ItsJust: comunidade, artigos recomendados, resumo do projeto e contatos."
+  description="Pagina enxuta para alunos apos palestra do ItsJust com grupo WhatsApp, artigos recomendados e links essenciais."
 >
-  <section class="bg-dark-brown text-cream py-14 px-5">
+  <section class="bg-dark-brown text-cream py-10 px-5">
     <div class="max-w-content mx-auto">
-      <p class="font-body text-xs font-semibold tracking-widest text-gold/70 uppercase mb-2">ItsJust | Pos-palestra</p>
-      <h1 class="font-heading font-bold text-4xl md:text-5xl mb-4">Trilha para alunos</h1>
-      <p class="font-body text-cream/70 max-w-3xl leading-relaxed">
-        Obrigado por participar da palestra desta semana.
-        Aqui voce encontra os links principais para continuar aprendendo com autonomia: comunidade, artigos e canais de contato.
+      <p class="font-body text-[11px] font-semibold tracking-widest text-gold/70 uppercase mb-2">ItsJust | Pos-palestra</p>
+      <h1 class="font-heading font-bold text-3xl md:text-4xl mb-3">Alunos</h1>
+      <p class="font-body text-sm md:text-base text-cream/70 max-w-2xl leading-relaxed">
+        Pagina rapida da semana: entre no grupo certo, pegue os artigos principais e continue evoluindo com consistencia.
       </p>
     </div>
   </section>
 
-  <section class="px-5 py-10">
-    <div class="max-w-content mx-auto grid md:grid-cols-2 xl:grid-cols-4 gap-4">
-      <a href="/" class="card border-l-gold no-underline">
-        <p class="font-heading font-bold text-lg text-dark-brown mb-1">Site ItsJust</p>
-        <p class="font-body text-sm text-warm-gray">Voltar para a home e explorar os artigos.</p>
-      </a>
+  <section class="px-5 pt-4 pb-2">
+    <div class="max-w-content mx-auto grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <a href="#grupo" class="rounded-lg border border-[#E8DCC8] bg-off-white px-3 py-2 text-center no-underline font-body text-xs font-semibold text-dark-brown hover:border-gold/40 transition-colors">Grupo</a>
+      <a href="#links" class="rounded-lg border border-[#E8DCC8] bg-off-white px-3 py-2 text-center no-underline font-body text-xs font-semibold text-dark-brown hover:border-gold/40 transition-colors">Links</a>
+      <a href="#artigos" class="rounded-lg border border-[#E8DCC8] bg-off-white px-3 py-2 text-center no-underline font-body text-xs font-semibold text-dark-brown hover:border-gold/40 transition-colors">Artigos</a>
+      <a href="#sobre" class="rounded-lg border border-[#E8DCC8] bg-off-white px-3 py-2 text-center no-underline font-body text-xs font-semibold text-dark-brown hover:border-gold/40 transition-colors">Sobre</a>
+      <a href="#contato" class="rounded-lg border border-[#E8DCC8] bg-off-white px-3 py-2 text-center no-underline font-body text-xs font-semibold text-dark-brown hover:border-gold/40 transition-colors">Contato</a>
+    </div>
+  </section>
 
-      <a href="/comunidade" class="card border-l-gold no-underline">
-        <p class="font-heading font-bold text-lg text-dark-brown mb-1">Pagina da comunidade</p>
-        <p class="font-body text-sm text-warm-gray">Regras, grupos e canais oficiais do projeto.</p>
-      </a>
-
+  <section id="grupo" class="px-5 py-6">
+    <div class="max-w-content mx-auto rounded-2xl border border-gold/30 bg-gold/10 p-5">
+      <p class="font-body text-xs font-semibold tracking-wide text-gold/80 uppercase mb-2">Passo 1 (mais importante)</p>
+      <h2 class="font-heading font-bold text-xl text-dark-brown mb-2">Grupo WhatsApp de Alunos</h2>
+      <p class="font-body text-sm text-warm-gray mb-4">
+        Este e o canal principal para tirar duvidas, trocar experiencias e manter ritmo de estudo.
+      </p>
       <a
         href="https://chat.whatsapp.com/LGXJFtC48bd273R25xtEWt"
         target="_blank"
         rel="noopener noreferrer"
-        class="card border-l-gold no-underline"
+        class="btn-primary w-full justify-center"
       >
-        <p class="font-heading font-bold text-lg text-dark-brown mb-1">WhatsApp Alunos</p>
-        <p class="font-body text-sm text-warm-gray">Grupo para estudos, duvidas e troca de experiencias.</p>
-      </a>
-
-      <a
-        href="https://chat.whatsapp.com/ITOStJuXenb0okjlxjuiNI"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="card border-l-gold no-underline"
-      >
-        <p class="font-heading font-bold text-lg text-dark-brown mb-1">WhatsApp Geral</p>
-        <p class="font-body text-sm text-warm-gray">Canal principal com avisos e novidades do ItsJust.</p>
+        Entrar no grupo de alunos
       </a>
     </div>
   </section>
 
-  <section class="px-5 pb-6">
+  <section id="links" class="px-5 pb-3">
+    <div class="max-w-content mx-auto grid sm:grid-cols-3 gap-3">
+      <a href="/comunidade" class="rounded-xl border border-[#E8DCC8] bg-off-white px-4 py-3 no-underline hover:border-gold/40 transition-colors">
+        <p class="font-body text-sm font-semibold text-dark-brown">Comunidade</p>
+        <p class="font-body text-xs text-warm-gray mt-0.5">Regras e ecossistema</p>
+      </a>
+      <a href="https://chat.whatsapp.com/ITOStJuXenb0okjlxjuiNI" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-[#E8DCC8] bg-off-white px-4 py-3 no-underline hover:border-gold/40 transition-colors">
+        <p class="font-body text-sm font-semibold text-dark-brown">Grupo Geral</p>
+        <p class="font-body text-xs text-warm-gray mt-0.5">Avisos e novidades</p>
+      </a>
+      <a href="/" class="rounded-xl border border-[#E8DCC8] bg-off-white px-4 py-3 no-underline hover:border-gold/40 transition-colors">
+        <p class="font-body text-sm font-semibold text-dark-brown">Site ItsJust</p>
+        <p class="font-body text-xs text-warm-gray mt-0.5">Todas as secoes</p>
+      </a>
+    </div>
+  </section>
+
+  <section id="artigos" class="px-5 py-6">
     <div class="max-w-content mx-auto">
-      <div class="rounded-2xl border border-dashed border-gold/40 bg-off-white p-6">
-        <p class="font-heading font-bold text-xl text-dark-brown mb-2">Video da palestra (em breve)</p>
-        <p class="font-body text-sm text-warm-gray mb-5">
-          Este espaco esta pronto para receber o video da palestra.
-          Assim que voce enviar o link, colocamos o player aqui.
-        </p>
-        <div class="aspect-video rounded-xl border border-[#E8DCC8] bg-card-bg flex items-center justify-center">
-          <p class="font-body text-sm text-warm-gray">Area reservada para video</p>
+      <div class="flex items-end justify-between gap-4 mb-3">
+        <h2 class="font-heading font-bold text-2xl text-dark-brown">Artigos prioritarios</h2>
+        <a href="/tech/ai" class="font-body text-xs font-semibold text-gold hover:text-amber no-underline">Ver trilha AI -></a>
+      </div>
+      <p class="font-body text-sm text-warm-gray mb-4">
+        Comece pelos 2 primeiros. Os demais ajudam no aprofundamento.
+      </p>
+
+      <div class="md:hidden overflow-x-auto pb-2">
+        <div class="flex gap-3 min-w-full">
+          {relevantArticles.map((article, index) => (
+            <a
+              href={getArticleHref(article)}
+              class="w-[84vw] max-w-[22rem] flex-shrink-0 rounded-xl border border-[#E8DCC8] bg-off-white p-4 no-underline hover:border-gold/40 transition-colors"
+            >
+              <p class="font-body text-[11px] font-semibold text-gold mb-1">#{index + 1} recomendado</p>
+              <p class="font-heading font-bold text-base text-dark-brown leading-snug mb-2">{article.data.title}</p>
+              <p class="font-body text-xs text-warm-gray leading-relaxed">{article.data.description}</p>
+              <p class="font-body text-xs font-semibold text-gold mt-3">Ler agora -></p>
+            </a>
+          ))}
         </div>
       </div>
-    </div>
-  </section>
 
-  <section class="px-5 py-10">
-    <div class="max-w-content mx-auto">
-      <h2 class="font-heading font-bold text-3xl text-dark-brown mb-6">Artigos recomendados para alunos</h2>
-
-      <div class="grid md:grid-cols-2 gap-4">
-        {relevantArticles.map((article) => (
-          <a href={getArticleHref(article)} class="rounded-xl border border-[#E8DCC8] bg-off-white p-5 no-underline hover:border-gold/40 hover:bg-card-bg transition-all duration-200">
-            <p class="font-heading font-bold text-lg text-dark-brown mb-2">{article.data.title}</p>
-            <p class="font-body text-sm text-warm-gray leading-relaxed">{article.data.description}</p>
-            <p class="font-body text-xs font-semibold text-gold mt-4">Ler artigo →</p>
+      <div class="hidden md:grid md:grid-cols-2 gap-3">
+        {relevantArticles.map((article, index) => (
+          <a href={getArticleHref(article)} class="rounded-xl border border-[#E8DCC8] bg-off-white p-4 no-underline hover:border-gold/40 transition-colors">
+            <p class="font-body text-[11px] font-semibold text-gold mb-1">#{index + 1} recomendado</p>
+            <p class="font-heading font-bold text-base text-dark-brown mb-1">{article.data.title}</p>
+            <p class="font-body text-xs text-warm-gray leading-relaxed">{article.data.description}</p>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="px-5 pb-8">
-    <div class="max-w-content mx-auto rounded-2xl border border-[#E8DCC8] bg-card-bg p-6">
-      <h2 class="font-heading font-bold text-2xl text-dark-brown mb-3">Sobre o projeto ItsJust (resumo)</h2>
-      <p class="font-body text-sm text-warm-gray leading-relaxed mb-3">
-        O ItsJust transforma temas complexos em conteudo acessivel sobre tecnologia, carreira, educacao e vida real.
-      </p>
-      <p class="font-body text-sm text-warm-gray leading-relaxed mb-5">
-        A ideia e aprender com profundidade, sem complicacao desnecessaria, para voce usar o conhecimento de forma pratica no seu dia a dia.
-      </p>
-      <a href="/sobre" class="btn-primary text-xs">Saiba mais sobre o ItsJust</a>
-    </div>
-  </section>
+  <section class="px-5 pb-14">
+    <div class="max-w-content mx-auto space-y-3">
+      <details id="sobre" class="rounded-xl border border-[#E8DCC8] bg-off-white p-4">
+        <summary class="font-heading font-bold text-dark-brown cursor-pointer">Sobre o projeto ItsJust</summary>
+        <div class="mt-3">
+          <p class="font-body text-sm text-warm-gray leading-relaxed mb-3">
+            O ItsJust ajuda voce a aprender temas complexos com clareza, aplicacao pratica e linguagem acessivel.
+          </p>
+          <a href="/sobre" class="btn-secondary text-xs">Saiba mais</a>
+        </div>
+      </details>
 
-  <section class="px-5 pb-16">
-    <div class="max-w-content mx-auto">
-      <h2 class="font-heading font-bold text-2xl text-dark-brown mb-4">Contato</h2>
-      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <a href="mailto:contatoitsjust@gmail.com?subject=Pos-palestra%20Alunos" class="rounded-xl border border-[#E8DCC8] bg-off-white p-4 no-underline hover:border-gold/40 transition-colors">
-          <p class="font-heading font-bold text-base text-dark-brown mb-1">E-mail da marca</p>
-          <p class="font-body text-sm text-warm-gray">contatoitsjust@gmail.com</p>
-        </a>
-        <a href="mailto:guivdom@gmail.com?subject=Pos-palestra%20Alunos" class="rounded-xl border border-[#E8DCC8] bg-off-white p-4 no-underline hover:border-gold/40 transition-colors">
-          <p class="font-heading font-bold text-base text-dark-brown mb-1">Contato direto</p>
-          <p class="font-body text-sm text-warm-gray">guivdom@gmail.com</p>
-        </a>
-        <a href="https://www.linkedin.com/in/guilherme-domingues-19221019a" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-[#E8DCC8] bg-off-white p-4 no-underline hover:border-gold/40 transition-colors">
-          <p class="font-heading font-bold text-base text-dark-brown mb-1">LinkedIn</p>
-          <p class="font-body text-sm text-warm-gray">Conexao profissional e oportunidades</p>
-        </a>
-        <a href="https://www.youtube.com/@ItsJust-j1q" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-[#E8DCC8] bg-off-white p-4 no-underline hover:border-gold/40 transition-colors">
-          <p class="font-heading font-bold text-base text-dark-brown mb-1">YouTube</p>
-          <p class="font-body text-sm text-warm-gray">Conteudo audiovisual do projeto</p>
-        </a>
-      </div>
+      <details id="contato" class="rounded-xl border border-[#E8DCC8] bg-off-white p-4">
+        <summary class="font-heading font-bold text-dark-brown cursor-pointer">Contato</summary>
+        <div class="mt-3 grid sm:grid-cols-2 gap-2">
+          <a href="mailto:contatoitsjust@gmail.com?subject=Pos-palestra%20Alunos" class="rounded-lg border border-[#E8DCC8] px-3 py-2 no-underline hover:border-gold/40 transition-colors">
+            <p class="font-body text-xs font-semibold text-dark-brown">E-mail da marca</p>
+            <p class="font-body text-xs text-warm-gray">contatoitsjust@gmail.com</p>
+          </a>
+          <a href="mailto:guivdom@gmail.com?subject=Pos-palestra%20Alunos" class="rounded-lg border border-[#E8DCC8] px-3 py-2 no-underline hover:border-gold/40 transition-colors">
+            <p class="font-body text-xs font-semibold text-dark-brown">Contato direto</p>
+            <p class="font-body text-xs text-warm-gray">guivdom@gmail.com</p>
+          </a>
+          <a href="https://www.linkedin.com/in/guilherme-domingues-19221019a" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-[#E8DCC8] px-3 py-2 no-underline hover:border-gold/40 transition-colors">
+            <p class="font-body text-xs font-semibold text-dark-brown">LinkedIn</p>
+            <p class="font-body text-xs text-warm-gray">Perfil profissional</p>
+          </a>
+          <a href="https://www.youtube.com/@ItsJust-j1q" target="_blank" rel="noopener noreferrer" class="rounded-lg border border-[#E8DCC8] px-3 py-2 no-underline hover:border-gold/40 transition-colors">
+            <p class="font-body text-xs font-semibold text-dark-brown">YouTube</p>
+            <p class="font-body text-xs text-warm-gray">Canal oficial</p>
+          </a>
+        </div>
+      </details>
     </div>
   </section>
 </Base>
