@@ -1,5 +1,7 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
+import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import ArticleSidebar from '../components/ArticleSidebar.astro';
@@ -146,6 +148,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       document.addEventListener('astro:page-load', clearPetals);
     })();
   </script>
+
+  <Analytics />
+  <SpeedInsights />
 
 </body>
 </html>
