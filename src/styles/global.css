@@ -11,6 +11,7 @@
     background-color: theme('colors.cream');
     color: theme('colors.dark-brown');
     scroll-behavior: smooth;
+    color-scheme: light;
   }
 
   h1, h2, h3, h4, h5, h6 {
