@@ -286,31 +286,28 @@ const NAV = [
 
 <script>
   const STORAGE_KEY = 'itsjust-sidebar';
-  const W = '18rem';
 
   function initSidebar() {
+    const root = document.documentElement;
     const sidebar  = document.getElementById('article-sidebar') as HTMLElement | null;
     const overlay  = document.getElementById('sidebar-overlay') as HTMLElement | null;
     const openBtn  = document.getElementById('sidebar-open') as HTMLElement | null;
     const closeBtn = document.getElementById('sidebar-close') as HTMLElement | null;
     const menuBtn  = document.getElementById('menu-btn') as HTMLElement | null;
-    const header   = document.getElementById('site-header') as HTMLElement | null;
-    const wrapper  = document.getElementById('article-content-wrapper') as HTMLElement | null;
-    const pageMain = document.getElementById('page-main') as HTMLElement | null;
-    const contentEl = wrapper ?? pageMain;
 
     if (!sidebar || !openBtn || !closeBtn || !overlay) return;
+
+    const setSidebarState = (state: 'open' | 'closed') => {
+      root.setAttribute('data-sidebar', state);
+      document.body.setAttribute('data-sidebar', state);
+    };
 
     function openSidebar() {
       sidebar!.classList.remove('-translate-x-full');
       openBtn!.classList.add('opacity-0', 'pointer-events-none');
-      document.body.setAttribute('data-sidebar', 'open');
+      setSidebarState('open');
       if (window.innerWidth < 1024) {
         overlay!.classList.remove('hidden');
-      } else {
-        contentEl?.style.setProperty('--sidebar-w', W);
-        if (!wrapper && pageMain) pageMain.style.paddingLeft = W;
-        if (header) header.style.paddingLeft = W;
       }
       try { localStorage.setItem(STORAGE_KEY, '1'); } catch {}
     }
@@ -319,10 +316,7 @@ const NAV = [
       sidebar!.classList.add('-translate-x-full');
       openBtn!.classList.remove('opacity-0', 'pointer-events-none');
       overlay!.classList.add('hidden');
-      document.body.setAttribute('data-sidebar', 'closed');
-      contentEl?.style.setProperty('--sidebar-w', '0px');
-      if (!wrapper && pageMain) pageMain.style.paddingLeft = '';
-      if (header) header.style.paddingLeft = '';
+      setSidebarState('closed');
       try { localStorage.setItem(STORAGE_KEY, '0'); } catch {}
     }
 

@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap');
 
 /* ─── Base ─────────────────────────────────────────── */
 @layer base {
@@ -193,21 +193,42 @@
 }
 
 @media (min-width: 1024px) {
+  /* Estado base no desktop: sidebar aberta e espaco reservado no primeiro paint */
+  #site-header,
+  #page-main,
   #article-content-wrapper {
-    padding-left: var(--sidebar-w, 18rem);
-  }
-  /* Header desloca quando sidebar abre */
-  body[data-sidebar="open"] #site-header {
     padding-left: 18rem;
   }
-  /* Logo some do header quando sidebar está visível (sidebar tem o logo) */
-  body[data-sidebar="open"] #header-logo {
+
+  /* Estado fechado: remove deslocamento e exibe aba de reabertura */
+  html[data-sidebar="closed"] #site-header,
+  html[data-sidebar="closed"] #page-main,
+  html[data-sidebar="closed"] #article-content-wrapper {
+    padding-left: 0;
+  }
+  html[data-sidebar="open"] #article-sidebar {
+    transform: translateX(0);
+  }
+  html[data-sidebar="closed"] #article-sidebar {
+    transform: translateX(-100%);
+  }
+  html[data-sidebar="open"] #sidebar-open {
+    opacity: 0;
+    pointer-events: none;
+  }
+  html[data-sidebar="closed"] #sidebar-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Logo do header acompanha estado da sidebar */
+  html[data-sidebar="open"] #header-logo {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
   }
-  body[data-sidebar="closed"] #header-logo,
-  body:not([data-sidebar]) #header-logo {
+  html[data-sidebar="closed"] #header-logo,
+  html:not([data-sidebar]) #header-logo {
     opacity: 1;
     transition: opacity 0.2s;
   }

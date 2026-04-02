@@ -32,6 +32,18 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   <meta name="description" content={description} />
   <meta name="generator" content={Astro.generator} />
 
+  <script is:inline>
+    (() => {
+      // Define o estado da sidebar antes do primeiro paint para evitar layout shift.
+      try {
+        const saved = localStorage.getItem('itsjust-sidebar');
+        document.documentElement.setAttribute('data-sidebar', saved === '0' ? 'closed' : 'open');
+      } catch {
+        document.documentElement.setAttribute('data-sidebar', 'open');
+      }
+    })();
+  </script>
+
   <!-- OG -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content={canonicalURL} />
