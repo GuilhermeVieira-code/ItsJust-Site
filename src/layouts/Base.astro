@@ -64,30 +64,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   </main>
   <Footer />
 
-  <!-- Scroll reveal global -->
-  <script>
-    function initReveal() {
-      const revealEls = document.querySelectorAll<HTMLElement>('.reveal:not(.visible)');
-      if (!revealEls.length) return;
-      const io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              io.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.1, rootMargin: '0px 0px -48px 0px' }
-      );
-      revealEls.forEach(el => io.observe(el));
-    }
-
-    // Roda no load inicial e após cada transição de página
-    initReveal();
-    document.addEventListener('astro:page-load', initReveal);
-  </script>
-
   <!-- Efeito de pétalas na transição -->
   <script>
     const PETAL_SVG = `

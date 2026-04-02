@@ -65,23 +65,13 @@
   animation: heading-highlight 1.6s ease-in-out;
 }
 
-/* ─── Scroll reveal ─────────────────────────────────── */
-@keyframes reveal-up {
-  from { opacity: 0; transform: translateY(26px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.reveal {
-  opacity: 0;
-  will-change: opacity, transform;
-}
+/* ─── Reveal desativado (conteúdo sempre visível) ───── */
+.reveal,
 .reveal.visible {
-  animation: reveal-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
 }
-.reveal-delay-1.visible { animation-delay: 0.08s; }
-.reveal-delay-2.visible { animation-delay: 0.16s; }
-.reveal-delay-3.visible { animation-delay: 0.24s; }
-.reveal-delay-4.visible { animation-delay: 0.32s; }
 
 /* ─── Ícone dourado nos h2 do artigo (escala com a fonte) ── */
 .prose-itsjust h2 {
