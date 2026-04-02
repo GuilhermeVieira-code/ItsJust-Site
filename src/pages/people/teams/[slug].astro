@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import { getArticleSlug, isPublicArticleStatus } from '../../../content/config';
+
+export async function getStaticPaths() {
+  const legacyTeamArticles = await getCollection(
+    'articles',
+    ({ data }) =>
+      isPublicArticleStatus(data.status) &&
+      data.section === 'ItsJustPeople' &&
+      data.subtopic === 'ItsJustTeams'
+  );
+
+  return legacyTeamArticles.map((article) => ({
+    params: { slug: getArticleSlug(article) },
+  }));
+}
+
+const { slug } = Astro.params;
+const target = slug ? `/people/education/${slug}` : '/people/education';
+return Astro.redirect(target, 301);
+---

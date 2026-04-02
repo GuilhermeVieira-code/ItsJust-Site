@@ -1,5 +1,5 @@
 ---
-import { SECTION_SLUG, SUBTOPIC_SLUG, getArticleSlug } from '../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, getArticleSlug, getSectionLabel, getSubtopicLabel } from '../content/config';
 
 interface Article {
   id: string;
@@ -25,6 +25,7 @@ type NodeData = {
   type: 'hub' | 'subtopic' | 'article' | 'phantom';
   subtopic?: string;
   section?: string;
+  topicLabel?: string;
   href?: string;
   tags?: string[];
 };
@@ -37,14 +38,14 @@ const edges: EdgeData[] = [];
 // Hubs de seção (nós grandes, âncoras)
 const SECTIONS_USED = [...new Set(articles.map(a => a.data.section))];
 for (const sec of SECTIONS_USED) {
-  nodes.push({ id: `hub:${sec}`, label: sec.replace('ItsJust', ''), type: 'hub', section: sec });
+  nodes.push({ id: `hub:${sec}`, label: getSectionLabel(sec), type: 'hub', section: sec, topicLabel: getSectionLabel(sec) });
 }
 
 // Nós de subtópico (nós médios)
 const SUBTOPICS_USED = [...new Set(articles.map(a => a.data.subtopic))];
 for (const sub of SUBTOPICS_USED) {
   const sec = articles.find(a => a.data.subtopic === sub)?.data.section ?? '';
-  nodes.push({ id: `sub:${sub}`, label: sub.replace('ItsJust', ''), type: 'subtopic', subtopic: sub, section: sec });
+  nodes.push({ id: `sub:${sub}`, label: getSubtopicLabel(sub), type: 'subtopic', subtopic: sub, section: sec, topicLabel: getSubtopicLabel(sub) });
   edges.push({ source: `hub:${sec}`, target: `sub:${sub}`, strength: 0.8 });
 }
 
@@ -60,6 +61,7 @@ for (const a of articles) {
     type: 'article',
     subtopic: a.data.subtopic,
     section: a.data.section,
+    topicLabel: getSubtopicLabel(a.data.subtopic),
     href,
     tags: a.data.tags,
   });
@@ -89,9 +91,9 @@ for (const ph of PHANTOMS) {
   const hubId = `hub:${ph.section}`;
   // Só adiciona hub de seção se não existe
   if (!nodes.find(n => n.id === hubId)) {
-    nodes.push({ id: hubId, label: ph.section.replace('ItsJust', ''), type: 'hub', section: ph.section });
+    nodes.push({ id: hubId, label: getSectionLabel(ph.section), type: 'hub', section: ph.section, topicLabel: getSectionLabel(ph.section) });
   }
-  nodes.push({ id: ph.id, label: ph.label, type: 'phantom', section: ph.section });
+  nodes.push({ id: ph.id, label: ph.label, type: 'phantom', section: ph.section, topicLabel: getSectionLabel(ph.section) });
   edges.push({ source: hubId, target: ph.id, strength: 0.4 });
 }
 
@@ -267,7 +269,7 @@ const graphData = JSON.stringify({ nodes, edges });
   function showTooltip(n, x, y) {
     if (!tooltip) return;
     ttTitle.textContent = n.label;
-    ttSub.textContent   = (n.subtopic ?? n.section ?? '').replace('ItsJust', '');
+    ttSub.textContent   = n.topicLabel ?? '';
     ttHint.classList.toggle('hidden', n.type !== 'article');
     tooltip.classList.remove('hidden');
     let tx = x + 12, ty = y - 52;

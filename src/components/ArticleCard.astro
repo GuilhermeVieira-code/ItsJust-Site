@@ -1,5 +1,5 @@
 ---
-import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, getSubtopicLabel } from '../content/config';
 
 interface Props {
   title: string;
@@ -20,6 +20,7 @@ const bannerImage = cover ?? (video ? `https://img.youtube.com/vi/${video}/maxre
 
 const sectionSlug  = SECTION_SLUG[section as keyof typeof SECTION_SLUG] ?? section.toLowerCase();
 const subtopicSlug = SUBTOPIC_SLUG[subtopic as keyof typeof SUBTOPIC_SLUG] ?? subtopic.toLowerCase();
+const subtopicLabel = getSubtopicLabel(subtopic);
 const href         = `/${sectionSlug}/${subtopicSlug}/${slug}`;
 const dateStr      = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
@@ -58,7 +59,7 @@ const banner = BANNER[subtopic] ?? { gradient: 'linear-gradient(135deg, #2C1810 
           <!-- Dot accent no canto -->
           <div class="absolute bottom-3 right-4 flex gap-1 items-center">
             <div class="w-1.5 h-1.5 rounded-full" style={`background: ${banner.accent}; opacity: 0.7;`}></div>
-            <span class="text-[10px] font-semibold tracking-widest opacity-50 text-white">{subtopic.replace('ItsJust', '').toUpperCase()}</span>
+            <span class="text-[10px] font-semibold tracking-widest opacity-50 text-white">{subtopicLabel.toUpperCase()}</span>
           </div>
         </div>
       )
@@ -70,7 +71,7 @@ const banner = BANNER[subtopic] ?? { gradient: 'linear-gradient(135deg, #2C1810 
 
     <!-- Subtópico + data em linha -->
     <div class="flex items-center justify-between">
-      <span class="tag-gold">{subtopic.replace('ItsJust', '')}</span>
+      <span class="tag-gold">{subtopicLabel}</span>
       <time class="font-body text-xs text-text-muted">{dateStr}</time>
     </div>
 

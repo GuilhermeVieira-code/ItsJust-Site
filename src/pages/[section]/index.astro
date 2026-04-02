@@ -2,50 +2,41 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import ArticleFilter from '../../components/ArticleFilter.astro';
-import { SECTION_SLUG, SUBTOPIC_SLUG, isPublicArticleStatus } from '../../content/config';
+import { SECTION_SLUG, getSectionLabel, isPublicArticleStatus } from '../../content/config';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles', ({ data }) => isPublicArticleStatus(data.status));
-  const paths: { params: { section: string }; props: { sectionLabel: string } }[] = [];
+  const paths: { params: { section: string }; props: { sectionKey: string } }[] = [];
   const seen = new Set<string>();
 
   for (const a of articles) {
     const sec = SECTION_SLUG[a.data.section as keyof typeof SECTION_SLUG];
     if (!seen.has(sec)) {
       seen.add(sec);
-      paths.push({ params: { section: sec }, props: { sectionLabel: a.data.section } });
+      paths.push({ params: { section: sec }, props: { sectionKey: a.data.section } });
     }
   }
   return paths;
 }
 
+const { sectionKey } = Astro.props;
 const { section } = Astro.params;
-const { sectionLabel } = Astro.props;
 
 const all = await getCollection('articles', ({ data }) =>
   isPublicArticleStatus(data.status) &&
   SECTION_SLUG[data.section as keyof typeof SECTION_SLUG] === section
 );
 const sorted = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-// Agrupa por subtópico
-const bySubtopic = sorted.reduce((acc, a) => {
-  const sub = SUBTOPIC_SLUG[a.data.subtopic as keyof typeof SUBTOPIC_SLUG];
-  if (!acc[sub]) acc[sub] = { label: a.data.subtopic, articles: [] };
-  acc[sub].articles.push(a);
-  return acc;
-}, {} as Record<string, { label: string; articles: typeof sorted }>);
-
-const label = sectionLabel.replace('ItsJust', 'ItsJust ');
+const label = getSectionLabel(sectionKey);
 ---
 
-<Base title={label} description={`Artigos de ${label} — ItsJust`}>
+<Base title={label} description={`Artigos de ${label} - ItsJust`}>
   <div class="max-w-content mx-auto px-5 py-12">
 
     <nav class="flex items-center gap-2 font-body text-xs text-warm-gray mb-8">
       <a href="/" class="hover:text-gold transition-colors">Home</a>
-      <span>›</span>
-      <span class="text-dark-brown">{label.replace('ItsJust ', '')}</span>
+      <span>></span>
+      <span class="text-dark-brown">{label}</span>
     </nav>
 
     <header class="mb-12">

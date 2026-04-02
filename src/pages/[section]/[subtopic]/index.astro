@@ -2,11 +2,11 @@
 import { getCollection } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import ArticleFilter from '../../../components/ArticleFilter.astro';
-import { SECTION_SLUG, SUBTOPIC_SLUG, isPublicArticleStatus } from '../../../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, getSectionLabel, getSubtopicLabel, isPublicArticleStatus } from '../../../content/config';
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles', ({ data }) => isPublicArticleStatus(data.status));
-  const paths: { params: { section: string; subtopic: string }; props: { subtopicLabel: string; sectionLabel: string } }[] = [];
+  const paths: { params: { section: string; subtopic: string }; props: { subtopicKey: string; sectionKey: string } }[] = [];
   const seen = new Set<string>();
 
   for (const a of articles) {
@@ -17,7 +17,7 @@ export async function getStaticPaths() {
       seen.add(key);
       paths.push({
         params: { section: sec, subtopic: sub },
-        props: { subtopicLabel: a.data.subtopic, sectionLabel: a.data.section },
+        props: { subtopicKey: a.data.subtopic, sectionKey: a.data.section },
       });
     }
   }
@@ -25,7 +25,7 @@ export async function getStaticPaths() {
 }
 
 const { section, subtopic } = Astro.params;
-const { subtopicLabel, sectionLabel } = Astro.props;
+const { subtopicKey, sectionKey } = Astro.props;
 
 const all = await getCollection('articles', ({ data }) =>
   isPublicArticleStatus(data.status) &&
@@ -33,23 +33,24 @@ const all = await getCollection('articles', ({ data }) =>
   SUBTOPIC_SLUG[data.subtopic as keyof typeof SUBTOPIC_SLUG] === subtopic
 );
 const sorted = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const label  = subtopicLabel.replace('ItsJust', 'ItsJust ');
+const label = getSubtopicLabel(subtopicKey);
+const sectionLabel = getSectionLabel(sectionKey);
 ---
 
-<Base title={label} description={`Artigos de ${label} — ItsJust`}>
+<Base title={label} description={`Artigos de ${label} - ItsJust`}>
   <div class="max-w-content mx-auto px-5 py-12">
 
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 font-body text-xs text-warm-gray mb-8">
       <a href="/" class="hover:text-gold transition-colors">Home</a>
-      <span>›</span>
-      <a href={`/${section}`} class="hover:text-gold transition-colors capitalize">{sectionLabel.replace('ItsJust', '')}</a>
-      <span>›</span>
-      <span class="text-dark-brown capitalize">{label.replace('ItsJust ', '')}</span>
+      <span>></span>
+      <a href={`/${section}`} class="hover:text-gold transition-colors">{sectionLabel}</a>
+      <span>></span>
+      <span class="text-dark-brown">{label}</span>
     </nav>
 
     <header class="mb-10">
-      <span class="tag mb-3 inline-block">{label.replace('ItsJust ', '')}</span>
+      <span class="tag mb-3 inline-block">{label}</span>
       <h1 class="font-heading font-bold text-3xl text-dark-brown">{label}</h1>
       <p class="font-body text-warm-gray mt-2">{sorted.length} artigo{sorted.length !== 1 ? 's' : ''}</p>
     </header>

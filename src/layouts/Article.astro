@@ -6,7 +6,7 @@ import DeepDive from '../components/DeepDive.astro';
 import RelatedArticles from '../components/RelatedArticles.astro';
 import YouTube from '../components/YouTube.astro';
 import SocialCTA from '../components/SocialCTA.astro';
-import { SECTION_SLUG, SUBTOPIC_SLUG } from '../content/config';
+import { SECTION_SLUG, SUBTOPIC_SLUG, getSectionLabel, getSubtopicLabel } from '../content/config';
 
 interface Heading { depth: number; slug: string; text: string; }
 interface Resource { title: string; url: string; source?: string; }
@@ -53,6 +53,8 @@ const {
 
 const sectionSlug  = SECTION_SLUG[section as keyof typeof SECTION_SLUG] ?? section.toLowerCase();
 const subtopicSlug = SUBTOPIC_SLUG[subtopic as keyof typeof SUBTOPIC_SLUG] ?? subtopic.toLowerCase();
+const sectionLabel = getSectionLabel(section);
+const subtopicLabel = getSubtopicLabel(subtopic);
 
 const dateStr    = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 const updatedStr = updated?.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -74,14 +76,14 @@ const updatedStr = updated?.toLocaleDateString('pt-BR', { day: '2-digit', month:
           <nav class="flex items-center gap-2 font-body text-xs text-warm-gray mb-8 reveal">
             <a href="/" class="hover:text-gold transition-colors">Home</a>
             <span>›</span>
-            <a href={`/${sectionSlug}`} class="hover:text-gold transition-colors capitalize">{sectionSlug}</a>
+            <a href={`/${sectionSlug}`} class="hover:text-gold transition-colors">{sectionLabel}</a>
             <span>›</span>
-            <a href={`/${sectionSlug}/${subtopicSlug}`} class="hover:text-gold transition-colors capitalize">{subtopicSlug}</a>
+            <a href={`/${sectionSlug}/${subtopicSlug}`} class="hover:text-gold transition-colors">{subtopicLabel}</a>
           </nav>
 
           <!-- Hero do artigo -->
           <header class="mb-10 reveal reveal-delay-1">
-            <span class="tag mb-4 inline-block">{subtopic.replace('ItsJust', '')}</span>
+            <span class="tag mb-4 inline-block">{subtopicLabel}</span>
             <h1 class="font-heading font-bold text-3xl md:text-4xl text-dark-brown leading-tight mb-4">
               {title}
             </h1>

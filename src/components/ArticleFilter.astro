@@ -1,6 +1,6 @@
 ---
 import ArticleCard from './ArticleCard.astro';
-import { getArticleSlug } from '../content/config';
+import { getArticleSlug, getSectionLabel, getSubtopicLabel } from '../content/config';
 
 interface Article {
   id: string;
@@ -58,20 +58,20 @@ const sections  = [...new Set(articles.map(a => a.data.section))];
       {showSectionFilter && sections.map(section => (
         <button
           data-filter={`section:${section}`}
-          data-label={section.replace('ItsJust', '')}
+          data-label={getSectionLabel(section)}
           class="filter-btn font-body text-xs font-semibold px-4 py-1.5 rounded-sm border transition-all"
         >
-          {section.replace('ItsJust', 'ItsJust ')}
+          {getSectionLabel(section)}
         </button>
       ))}
 
       {subtopics.map(subtopic => (
         <button
           data-filter={`subtopic:${subtopic}`}
-          data-label={subtopic.replace('ItsJust', '')}
+          data-label={getSubtopicLabel(subtopic)}
           class="filter-btn font-body text-xs font-semibold px-4 py-1.5 rounded-sm border transition-all"
         >
-          {subtopic.replace('ItsJust', '')}
+          {getSubtopicLabel(subtopic)}
         </button>
       ))}
     </div>

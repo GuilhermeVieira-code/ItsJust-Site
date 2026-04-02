@@ -4,6 +4,8 @@ const SECTIONS    = ['ItsJustTech', 'ItsJustInnovation', 'ItsJustPeople', 'ItsJu
 const SUBTOPICS   = ['ItsJustAI', 'ItsJustDev', 'ItsJustData', 'ItsJustFuture',
                      'ItsJustStartups', 'ItsJustScience', 'ItsJustLeaders',
                      'ItsJustTeams', 'ItsJustWork', 'ItsJustSociety'] as const;
+export type SectionKey = typeof SECTIONS[number];
+export type SubtopicKey = typeof SUBTOPICS[number];
 const STATUS_VALUES = ['draft', 'review', 'approved', 'published'] as const;
 export type ArticleStatus = typeof STATUS_VALUES[number];
 
@@ -12,14 +14,21 @@ export function isPublicArticleStatus(status: ArticleStatus): boolean {
   return PUBLIC_ARTICLE_STATUSES.has(status);
 }
 
-export const SECTION_SLUG: Record<typeof SECTIONS[number], string> = {
+export const SECTION_SLUG: Record<SectionKey, string> = {
   ItsJustTech:       'tech',
   ItsJustInnovation: 'innovation',
   ItsJustPeople:     'people',
   ItsJustLife:       'life',
 };
 
-export const SUBTOPIC_SLUG: Record<typeof SUBTOPICS[number], string> = {
+export const SECTION_LABEL: Record<SectionKey, string> = {
+  ItsJustTech:       'Tech',
+  ItsJustInnovation: 'Innovation',
+  ItsJustPeople:     'People',
+  ItsJustLife:       'Life',
+};
+
+export const SUBTOPIC_SLUG: Record<SubtopicKey, string> = {
   ItsJustAI:       'ai',
   ItsJustDev:      'dev',
   ItsJustData:     'data',
@@ -27,10 +36,31 @@ export const SUBTOPIC_SLUG: Record<typeof SUBTOPICS[number], string> = {
   ItsJustStartups: 'startups',
   ItsJustScience:  'science',
   ItsJustLeaders:  'leaders',
-  ItsJustTeams:    'teams',
+  ItsJustTeams:    'education',
   ItsJustWork:     'work',
   ItsJustSociety:  'society',
 };
+
+export const SUBTOPIC_LABEL: Record<SubtopicKey, string> = {
+  ItsJustAI:       'AI',
+  ItsJustDev:      'Dev',
+  ItsJustData:     'Data',
+  ItsJustFuture:   'Future',
+  ItsJustStartups: 'Startups',
+  ItsJustScience:  'Science',
+  ItsJustLeaders:  'Leaders',
+  ItsJustTeams:    'Education',
+  ItsJustWork:     'Work',
+  ItsJustSociety:  'Society',
+};
+
+export function getSectionLabel(section: string): string {
+  return (SECTION_LABEL as Record<string, string>)[section] ?? section.replace(/^ItsJust/, '');
+}
+
+export function getSubtopicLabel(subtopic: string): string {
+  return (SUBTOPIC_LABEL as Record<string, string>)[subtopic] ?? subtopic.replace(/^ItsJust/, '');
+}
 
 type ArticleLike = { id: string; data?: { slug?: string } };
 
