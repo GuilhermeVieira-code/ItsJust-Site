@@ -66,55 +66,85 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
   <!-- Efeito de pétalas na transição -->
   <script>
-    const PETAL_SVG = `
-      <svg width="18" height="24" viewBox="0 0 18 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9 0C9 0 18 8 18 14C18 19.5228 14 24 9 24C4 24 0 19.5228 0 14C0 8 9 0 9 0Z"
-              fill="currentColor" opacity="0.85"/>
-      </svg>`;
+    (() => {
+      const W = window as Window & { __itsjustPetalsInit?: boolean };
+      if (W.__itsjustPetalsInit) return;
+      W.__itsjustPetalsInit = true;
 
-    function spawnPetals(count = 60) {
-      const overlay = document.getElementById('petal-overlay');
-      if (!overlay) return;
-      overlay.innerHTML = '';
+      const PETAL_SVG = `
+        <svg width="18" height="24" viewBox="0 0 18 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 0C9 0 18 8 18 14C18 19.5228 14 24 9 24C4 24 0 19.5228 0 14C0 8 9 0 9 0Z"
+                fill="currentColor" opacity="0.85"/>
+        </svg>`;
 
       const colors = ['#D4A017', '#F2A900', '#FFD54F', '#E8C547', '#C49010', '#B8860B', '#FBBF24', '#F59E0B'];
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
 
-      // Distribui pétalas em colunas para cobrir a tela toda
-      for (let i = 0; i < count; i++) {
-        const scale = (0.6 + Math.random() * 1.8).toFixed(2);
-        const rotate = Math.floor(180 + Math.random() * 540);
-        const duration = (0.8 + Math.random() * 1.0).toFixed(2);
-        // Delay escalonado para que as pétalas desçam em ondas cobrindo a tela
-        const delay = (i / count * 0.5 + Math.random() * 0.2).toFixed(2);
-        // Distribuição uniforme horizontal: divide a tela em faixas
-        const col = i % 10;
-        const leftBase = col * 10 + Math.random() * 8;
-        const el = document.createElement('div');
-        el.className = 'petal-particle';
-        el.innerHTML = PETAL_SVG;
-        el.style.cssText = `
-          position: fixed;
-          left: ${leftBase}vw;
-          top: ${-6 - Math.random() * 20}vh;
-          color: ${colors[Math.floor(Math.random() * colors.length)]};
-          --s: ${scale};
-          --r: ${rotate}deg;
-          animation: petal-fall ${duration}s cubic-bezier(0.3, 0, 0.7, 1) ${delay}s forwards;
-          pointer-events: none;
-          z-index: 9999;
-        `;
-        overlay.appendChild(el);
+      let clearTimer = 0;
+      let isRunning = false;
+
+      function clearPetals() {
+        const overlay = document.getElementById('petal-overlay');
+        if (!overlay) return;
+        overlay.innerHTML = '';
+        isRunning = false;
+        if (clearTimer) {
+          window.clearTimeout(clearTimer);
+          clearTimer = 0;
+        }
       }
 
-      setTimeout(() => { overlay.innerHTML = ''; }, 2000);
-    }
+      function spawnPetals() {
+        if (prefersReduced) return;
 
-    // Dispara pétalas antes de cada transição de página
-    document.addEventListener('astro:before-preparation', () => spawnPetals());
-    // Fallback: dispara no before-swap se ainda não houver pétalas
-    document.addEventListener('astro:before-swap', () => {
-      if (!document.getElementById('petal-overlay')?.children.length) spawnPetals(40);
-    });
+        const overlay = document.getElementById('petal-overlay');
+        if (!overlay) return;
+
+        if (isRunning) clearPetals();
+        isRunning = true;
+
+        const count = coarsePointer ? 26 : 42;
+        overlay.innerHTML = '';
+
+        for (let i = 0; i < count; i++) {
+          const scale = (0.65 + Math.random() * 1.5).toFixed(2);
+          const rotate = Math.floor(220 + Math.random() * 420);
+          const duration = (0.75 + Math.random() * 0.75).toFixed(2);
+          const delay = (i / count * 0.4 + Math.random() * 0.16).toFixed(2);
+          const col = i % 10;
+          const leftBase = col * 10 + Math.random() * 8;
+
+          const el = document.createElement('div');
+          el.className = 'petal-particle';
+          el.innerHTML = PETAL_SVG;
+          el.style.cssText = `
+            position: fixed;
+            left: ${leftBase}vw;
+            top: ${-8 - Math.random() * 16}vh;
+            color: ${colors[Math.floor(Math.random() * colors.length)]};
+            --s: ${scale};
+            --r: ${rotate}deg;
+            animation: petal-fall ${duration}s cubic-bezier(0.3, 0, 0.7, 1) ${delay}s forwards;
+            pointer-events: none;
+          `;
+          overlay.appendChild(el);
+        }
+
+        clearTimer = window.setTimeout(clearPetals, 1800);
+      }
+
+      // Dispara pétalas antes de cada transição de página.
+      document.addEventListener('astro:before-preparation', spawnPetals);
+
+      // Fallback: se antes do swap não houver animação ativa, dispara uma versão menor.
+      document.addEventListener('astro:before-swap', () => {
+        if (!document.getElementById('petal-overlay')?.children.length) spawnPetals();
+      });
+
+      // Garante limpeza ao concluir navegação.
+      document.addEventListener('astro:page-load', clearPetals);
+    })();
   </script>
 
 </body>

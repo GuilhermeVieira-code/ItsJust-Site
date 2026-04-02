@@ -35,6 +35,11 @@
 ::view-transition-new(root) {
   animation: page-enter 0.45s cubic-bezier(0, 0, 0.2, 1) forwards;
 }
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  pointer-events: none;
+}
 
 @keyframes page-exit {
   from { opacity: 1; transform: translateY(0) scale(1); }
@@ -51,6 +56,20 @@
   15%  { opacity: 1; }
   80%  { opacity: 0.6; }
   100% { opacity: 0; transform: translateY(110vh) rotate(var(--r, 540deg)) scale(var(--s, 1)); }
+}
+
+#petal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint style;
+}
+
+#petal-overlay .petal-particle {
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* ─── Animação de highlight ao navegar via TOC ──────── */
