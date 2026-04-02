@@ -22,7 +22,7 @@ interface Props {
 const { extra = [] } = Astro.props;
 
 const TYPE_CONFIG: Record<NormalizedResource['type'], { label: string; icon: string; bg: string; text: string; border: string }> = {
-  youtube:    { label: 'YouTube',    icon: '▶', bg: 'bg-red-50',     text: 'text-red-600',     border: 'border-red-200' },
+  youtube:    { label: 'YouTube',    icon: '▶',  bg: 'bg-red-50',     text: 'text-red-600',     border: 'border-red-200' },
   podcast:    { label: 'Podcast',    icon: '🎙', bg: 'bg-blue-50',    text: 'text-blue-600',    border: 'border-blue-200' },
   newsletter: { label: 'Newsletter', icon: '📰', bg: 'bg-sky-50',     text: 'text-sky-600',     border: 'border-sky-200' },
   course:     { label: 'Curso',      icon: '📚', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
@@ -88,16 +88,16 @@ const languageTag = (language: NormalizedResource['language']) => {
       <span class="text-2xl select-none" aria-hidden="true">🌻</span>
       <div>
         <h2 class="font-heading font-bold text-xl text-dark-brown leading-tight">
-          Se aprofunde em outros conteudos
+          Se aprofunde em outros conteúdos
         </h2>
         <p class="font-body text-sm text-warm-gray mt-0.5">
-          Priorizamos referencias em portugues para facilitar sua jornada.
+          Priorizamos referências em português para facilitar sua jornada.
         </p>
       </div>
     </div>
 
     <p class="font-body text-xs text-warm-gray mb-5">
-      {ptCount} de {sorted.length} referencia{sorted.length !== 1 ? 's' : ''} em PT-BR.
+      {ptCount} de {sorted.length} referência{sorted.length !== 1 ? 's' : ''} em PT-BR.
     </p>
 
     <div class="grid sm:grid-cols-2 gap-3">
@@ -140,7 +140,7 @@ const languageTag = (language: NormalizedResource['language']) => {
     {remaining.length > 0 && (
       <details class="mt-4 rounded-xl border border-[#E8DCC8] bg-[#FFFBF0]">
         <summary class="cursor-pointer list-none px-4 py-3 font-body text-sm font-semibold text-dark-brown flex items-center justify-between">
-          <span>Ver mais referencias ({remaining.length})</span>
+          <span>Ver mais referências ({remaining.length})</span>
           <span class="text-gold">↓</span>
         </summary>
 
